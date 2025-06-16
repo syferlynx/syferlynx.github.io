@@ -11,6 +11,9 @@ build/
 public/
 coverage/
 
+# IDE settings
+.vscode/
+
 # OS files
 .DS_Store
 Thumbs.db
