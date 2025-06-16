@@ -5,12 +5,14 @@ This guide will help you enable and configure Hyper-V on your Windows system wit
 ## 📋 Prerequisites
 
 ### System Requirements
+
 - **Windows Edition**: Windows 10/11 Pro, Enterprise, or Education (Home editions don't support Hyper-V)
 - **Processor**: 64-bit processor with Second Level Address Translation (SLAT)
 - **Memory**: 4 GB RAM minimum (8 GB+ recommended)
 - **Virtualization**: Hardware virtualization support enabled in BIOS/UEFI
 
 ### Hardware Requirements
+
 - VM Monitor Mode Extensions (VT-x on Intel, AMD-V on AMD)
 - Virtualization enabled in firmware (BIOS/UEFI)
 - Second Level Address Translation (EPT on Intel, NPT on AMD)
@@ -21,6 +23,7 @@ This guide will help you enable and configure Hyper-V on your Windows system wit
 ### Option 1: Automated Setup (Recommended)
 
 1. **Check Compatibility First**:
+
    ```cmd
    powershell -ExecutionPolicy Bypass -File check-hyperv-compatibility.ps1
    ```
@@ -33,6 +36,7 @@ This guide will help you enable and configure Hyper-V on your Windows system wit
 ### Option 2: Manual PowerShell Setup
 
 1. **Open PowerShell as Administrator**:
+
    - Press `Win + X` → Select "Windows PowerShell (Admin)" or "Terminal (Admin)"
    - Or search "PowerShell" → Right-click → "Run as administrator"
 
@@ -45,6 +49,7 @@ This guide will help you enable and configure Hyper-V on your Windows system wit
 ### Option 3: Manual Command Line
 
 **Using PowerShell (Admin)**:
+
 ```powershell
 # Enable Hyper-V
 Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All -All
@@ -54,18 +59,19 @@ DISM /Online /Enable-Feature /All /FeatureName:Microsoft-Hyper-V
 ```
 
 **Using Command Prompt (Admin)**:
+
 ```cmd
 dism.exe /Online /Enable-Feature:Microsoft-Hyper-V /All
 ```
 
 ## 📁 Files Included
 
-| File | Description |
-|------|-------------|
-| `setup-hyperv.ps1` | Main PowerShell script to enable and configure Hyper-V |
-| `setup-hyperv-admin.bat` | Batch file to run PowerShell script with admin privileges |
-| `check-hyperv-compatibility.ps1` | System compatibility checker |
-| `HYPERV-SETUP-README.md` | This documentation file |
+| File                             | Description                                               |
+| -------------------------------- | --------------------------------------------------------- |
+| `setup-hyperv.ps1`               | Main PowerShell script to enable and configure Hyper-V    |
+| `setup-hyperv-admin.bat`         | Batch file to run PowerShell script with admin privileges |
+| `check-hyperv-compatibility.ps1` | System compatibility checker                              |
+| `HYPERV-SETUP-README.md`         | This documentation file                                   |
 
 ## 🔧 What the Setup Script Does
 
@@ -83,18 +89,23 @@ dism.exe /Online /Enable-Feature:Microsoft-Hyper-V /All
 ## ⚠️ Important Notes
 
 ### Restart Required
+
 - **A system restart is required** after enabling Hyper-V
 - The script will offer to restart automatically
 - You can restart manually if preferred
 
 ### Conflicting Software
+
 Hyper-V may conflict with other virtualization software:
+
 - **VMware Workstation/Player** - May need to be disabled
 - **VirtualBox** - Cannot run simultaneously with Hyper-V
 - **BlueStacks** - Android emulator may have issues
 
 ### BIOS/UEFI Settings
+
 If the script reports virtualization is disabled:
+
 1. Restart your computer
 2. Enter BIOS/UEFI setup (usually F2, F12, or Del during boot)
 3. Look for virtualization settings:
@@ -105,6 +116,7 @@ If the script reports virtualization is disabled:
 ## 🎯 After Installation
 
 ### Verify Installation
+
 ```powershell
 # Check Hyper-V status
 Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All
@@ -117,11 +129,13 @@ Get-VMSwitch
 ```
 
 ### Access Hyper-V Manager
+
 - **Start Menu**: Search for "Hyper-V Manager"
 - **Run Dialog**: `virtmgmt.msc`
 - **PowerShell**: `Start-Process virtmgmt.msc`
 
 ### Useful PowerShell Commands
+
 ```powershell
 # Create a new VM
 New-VM -Name "MyVM" -MemoryStartupBytes 2GB -Generation 2
@@ -144,18 +158,22 @@ New-VMSwitch -Name "External Switch" -NetAdapterName "Ethernet" -AllowManagement
 ### Common Issues
 
 **"Hyper-V cannot be installed: The processor does not have required virtualization capabilities"**
+
 - Enable virtualization in BIOS/UEFI
 - Ensure you have a compatible 64-bit processor
 
 **"Hyper-V cannot be installed: A hypervisor is already running"**
+
 - Another virtualization software is active
 - Disable VMware, VirtualBox, or similar software
 
 **"Access Denied" or "Elevation Required"**
+
 - Run PowerShell or Command Prompt as Administrator
 - Use the provided batch file for automatic elevation
 
 **Virtual machines won't start**
+
 - Check if Hyper-V services are running: `Get-Service -Name vm*`
 - Restart Hyper-V services: `Restart-Service -Name vmms`
 
@@ -170,10 +188,12 @@ New-VMSwitch -Name "External Switch" -NetAdapterName "Ethernet" -AllowManagement
 ## 📞 Support
 
 ### Microsoft Documentation
+
 - [Hyper-V on Windows 10](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/)
 - [System Requirements](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/reference/hyper-v-requirements)
 
 ### PowerShell Help
+
 ```powershell
 # Get help for Hyper-V commands
 Get-Help *VM*
@@ -190,10 +210,11 @@ Disable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All
 ```
 
 Or use Windows Features:
+
 1. Open "Turn Windows features on or off"
 2. Uncheck "Hyper-V"
 3. Restart when prompted
 
 ---
 
-**Note**: This setup is designed for Windows 10/11 Pro, Enterprise, and Education editions. Home editions do not support Hyper-V natively. 
+**Note**: This setup is designed for Windows 10/11 Pro, Enterprise, and Education editions. Home editions do not support Hyper-V natively.

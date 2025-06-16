@@ -38,6 +38,7 @@ The development server will be available at `http://localhost:3001`
 ## Docker Files Overview
 
 ### `Dockerfile` (Production)
+
 - Multi-stage build for optimized production image
 - Uses Node.js to build the React application
 - Serves the built application using nginx
@@ -45,18 +46,21 @@ The development server will be available at `http://localhost:3001`
 - Final image size is significantly smaller due to multi-stage build
 
 ### `Dockerfile.dev` (Development)
+
 - Single-stage build for development
 - Includes hot reloading support
 - Mounts source code as volume for live updates
 - Includes all development dependencies
 
 ### `nginx.conf`
+
 - Custom nginx configuration for serving the React SPA
 - Handles client-side routing (React Router)
 - Includes performance optimizations (gzip, caching)
 - Security headers for production deployment
 
 ### `docker-compose.yml`
+
 - Orchestrates both production and development containers
 - Production service runs on port 3000
 - Development service runs on port 3001
@@ -65,6 +69,7 @@ The development server will be available at `http://localhost:3001`
 ## Available Commands
 
 ### Build Commands
+
 ```bash
 # Build production image
 docker build -t syferlynx-app .
@@ -77,6 +82,7 @@ docker-compose build
 ```
 
 ### Run Commands
+
 ```bash
 # Run production container
 docker run -p 3000:80 syferlynx-app
@@ -92,6 +98,7 @@ docker-compose --profile dev up
 ```
 
 ### Management Commands
+
 ```bash
 # Stop all containers
 docker-compose down
@@ -111,7 +118,7 @@ docker-compose exec syferlynx-app sh
 The application supports the following environment variables:
 
 - `NODE_ENV`: Set to 'production' or 'development'
-- `REACT_APP_*`: Any React environment variables (must start with REACT_APP_)
+- `REACT_APP_*`: Any React environment variables (must start with REACT*APP*)
 
 To use environment variables, create a `.env` file in the project root:
 
@@ -125,16 +132,19 @@ REACT_APP_VERSION=1.0.0
 ### Using Docker Hub
 
 1. Build and tag the image:
+
 ```bash
 docker build -t your-username/syferlynx-app:latest .
 ```
 
 2. Push to Docker Hub:
+
 ```bash
 docker push your-username/syferlynx-app:latest
 ```
 
 3. Deploy on server:
+
 ```bash
 docker pull your-username/syferlynx-app:latest
 docker run -d -p 80:80 --name syferlynx-prod your-username/syferlynx-app:latest
@@ -144,6 +154,7 @@ docker run -d -p 80:80 --name syferlynx-prod your-username/syferlynx-app:latest
 
 1. Copy `docker-compose.yml` to your server
 2. Run:
+
 ```bash
 docker-compose up -d
 ```
@@ -153,13 +164,16 @@ docker-compose up -d
 ### Common Issues
 
 1. **Port already in use**
+
    - Change the port mapping in docker-compose.yml or use different ports
 
 2. **Permission denied errors**
+
    - Ensure Docker has proper permissions
    - On Linux, you might need to use `sudo` or add your user to the docker group
 
 3. **Build failures**
+
    - Clear Docker cache: `docker system prune -a`
    - Ensure all dependencies are properly listed in package.json
 
@@ -172,16 +186,19 @@ docker-compose up -d
 To debug issues, you can:
 
 1. Check container logs:
+
 ```bash
 docker-compose logs syferlynx-app
 ```
 
 2. Execute shell in container:
+
 ```bash
 docker-compose exec syferlynx-app sh
 ```
 
 3. Inspect the built image:
+
 ```bash
 docker run -it --entrypoint sh syferlynx-app
 ```
@@ -208,4 +225,4 @@ The production Docker setup includes several optimizations:
 - Set up CI/CD pipeline for automated builds
 - Configure health checks for production deployment
 - Set up monitoring and logging
-- Consider using Docker secrets for sensitive data 
+- Consider using Docker secrets for sensitive data

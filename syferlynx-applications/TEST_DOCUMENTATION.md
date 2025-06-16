@@ -39,6 +39,7 @@ Each test file is organized into the following categories:
 ### Coverage Reports
 
 Coverage reports are generated in multiple formats:
+
 - Text summary in terminal
 - HTML report in `coverage/lcov-report/index.html`
 - LCOV format for CI/CD integration
@@ -212,4 +213,4 @@ The test suite is designed for CI/CD environments:
 1. **Test Performance**: Monitor test execution times
 2. **Flaky Tests**: Identify and fix unreliable tests
 3. **Coverage Trends**: Track coverage changes over time
-4. **Test Quality**: Regular review of test effectiveness 
+4. **Test Quality**: Regular review of test effectiveness

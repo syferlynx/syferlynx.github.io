@@ -6,19 +6,19 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - '3000:80'
     container_name: syferlynx-applications
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-    
+
   # Development service (optional)
   syferlynx-dev:
     build:
       context: .
       dockerfile: Dockerfile.dev
     ports:
-      - "3001:3000"
+      - '3001:3000'
     container_name: syferlynx-applications-dev
     volumes:
       - .:/app
@@ -27,4 +27,4 @@ services:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
     profiles:
-      - dev 
+      - dev

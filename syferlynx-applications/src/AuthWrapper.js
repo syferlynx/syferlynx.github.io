@@ -20,4 +20,4 @@ const AuthWrapper = () => {
   );
 };
 
-export default AuthWrapper; 
+export default AuthWrapper;

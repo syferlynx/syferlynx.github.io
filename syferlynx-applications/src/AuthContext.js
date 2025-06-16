@@ -19,15 +19,15 @@ const mockUsers = [
     username: 'admin',
     email: 'admin@example.com',
     password: 'admin123', // In real apps, passwords should be hashed
-    role: 'admin'
+    role: 'admin',
   },
   {
     id: 2,
     username: 'user',
     email: 'user@example.com',
     password: 'user123',
-    role: 'user'
-  }
+    role: 'user',
+  },
 ];
 
 // Authentication provider component
@@ -48,11 +48,13 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Find user in mock database
       const foundUser = mockUsers.find(
-        u => (u.username === username || u.email === username) && u.password === password
+        (u) =>
+          (u.username === username || u.email === username) &&
+          u.password === password,
       );
 
       if (foundUser) {
@@ -60,9 +62,9 @@ export const AuthProvider = ({ children }) => {
           id: foundUser.id,
           username: foundUser.username,
           email: foundUser.email,
-          role: foundUser.role
+          role: foundUser.role,
         };
-        
+
         setUser(userSession);
         localStorage.setItem('currentUser', JSON.stringify(userSession));
         return { success: true };
@@ -78,11 +80,11 @@ export const AuthProvider = ({ children }) => {
   const register = async (username, email, password) => {
     try {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Check if user already exists
       const existingUser = mockUsers.find(
-        u => u.username === username || u.email === email
+        (u) => u.username === username || u.email === email,
       );
 
       if (existingUser) {
@@ -95,7 +97,7 @@ export const AuthProvider = ({ children }) => {
         username,
         email,
         password, // In real apps, hash the password
-        role: 'user'
+        role: 'user',
       };
 
       mockUsers.push(newUser);
@@ -104,14 +106,17 @@ export const AuthProvider = ({ children }) => {
         id: newUser.id,
         username: newUser.username,
         email: newUser.email,
-        role: newUser.role
+        role: newUser.role,
       };
 
       setUser(userSession);
       localStorage.setItem('currentUser', JSON.stringify(userSession));
       return { success: true };
     } catch (error) {
-      return { success: false, error: 'Registration failed. Please try again.' };
+      return {
+        success: false,
+        error: 'Registration failed. Please try again.',
+      };
     }
   };
 
@@ -125,18 +130,18 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (updatedData) => {
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       const updatedUser = { ...user, ...updatedData };
       setUser(updatedUser);
       localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-      
+
       // Update in mock database
-      const userIndex = mockUsers.findIndex(u => u.id === user.id);
+      const userIndex = mockUsers.findIndex((u) => u.id === user.id);
       if (userIndex !== -1) {
         mockUsers[userIndex] = { ...mockUsers[userIndex], ...updatedData };
       }
-      
+
       return { success: true };
     } catch (error) {
       return { success: false, error: 'Profile update failed' };
@@ -150,12 +155,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateProfile,
     loading,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-}; 
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};

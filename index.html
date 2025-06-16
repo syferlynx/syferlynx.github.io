@@ -1,208 +1,303 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>App with Side Navigation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom style for the active navigation link */
-        .nav-link.active {
-            background-color: #4a5568; /* Slightly darker gray for active state */
-            font-weight: bold;
-            border-left: 3px solid #3b82f6; /* Blue left border for active state */
-            padding-left: calc(1rem - 3px); /* Adjust padding to account for border */
-        }
-        /* Style for content sections (initially hidden) */
-        .content-section {
-            display: none; /* Hide sections by default */
-        }
-        /* Style for the currently visible content section */
-        .content-section.visible {
-            display: block; /* Show the active section */
-        }
+      /* Custom style for the active navigation link */
+      .nav-link.active {
+        background-color: #4a5568; /* Slightly darker gray for active state */
+        font-weight: bold;
+        border-left: 3px solid #3b82f6; /* Blue left border for active state */
+        padding-left: calc(
+          1rem - 3px
+        ); /* Adjust padding to account for border */
+      }
+      /* Style for content sections (initially hidden) */
+      .content-section {
+        display: none; /* Hide sections by default */
+      }
+      /* Style for the currently visible content section */
+      .content-section.visible {
+        display: block; /* Show the active section */
+      }
     </style>
-</head>
-<body class="font-sans antialiased">
-
+  </head>
+  <body class="font-sans antialiased">
     <div class="flex h-screen bg-gray-100">
-
-        <aside class="w-64 bg-gray-800 text-white flex flex-col">
-            <div class="p-4 border-b border-gray-700">
-                <h1 class="text-xl font-semibold">My App</h1>
-            </div>
-
-            <nav class="flex-1 p-4 space-y-2">
-                <a href="#" data-target="home" class="nav-link block px-4 py-2 rounded hover:bg-gray-700 transition duration-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    Home
-                </a>
-                <a href="#" data-target="profile" class="nav-link block px-4 py-2 rounded hover:bg-gray-700 transition duration-200">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    Profile
-                </a>
-                <a href="#" data-target="settings" class="nav-link block px-4 py-2 rounded hover:bg-gray-700 transition duration-200">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Settings
-                </a>
-            </nav>
-
-            <div class="p-4 border-t border-gray-700 mt-auto">
-                <p class="text-xs text-gray-400">&copy; 2025 My App</p>
-            </div>
-        </aside>
-
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <header class="bg-white shadow-md p-4">
-                <h2 id="content-title" class="text-xl font-semibold text-gray-700">Home</h2>
-            </header>
-
-            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-                <div id="home" class="content-section">
-                    <h3 class="text-2xl font-semibold text-gray-800 mb-4">Welcome Home!</h3>
-                    <p class="text-gray-600">This is the main dashboard or home section of your application. You can put summary information, quick links, or introductory content here.</p>
-                    <div class="mt-6 p-4 bg-blue-100 border border-blue-300 rounded text-blue-800">
-                        This is a sample notification box.
-                    </div>
-                </div>
-
-                <div id="profile" class="content-section">
-                    <h3 class="text-2xl font-semibold text-gray-800 mb-4">User Profile</h3>
-                    <p class="text-gray-600 mb-4">Manage your profile information below.</p>
-                    <div class="bg-white p-6 rounded shadow-md">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
-                            Username
-                        </label>
-                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-4" id="username" type="text" placeholder="YourUsername" value="CurrentUser">
-
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
-                            Email
-                        </label>
-                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" placeholder="your.email@example.com" value="current.user@example.com">
-                         <button class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
-                            Save Profile
-                        </button>
-                    </div>
-                </div>
-
-                <div id="settings" class="content-section">
-                    <h3 class="text-2xl font-semibold text-gray-800 mb-4">Application Settings</h3>
-                    <p class="text-gray-600 mb-4">Configure application preferences.</p>
-                     <div class="bg-white p-6 rounded shadow-md space-y-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-gray-700">Enable Notifications</span>
-                            <label for="toggle" class="flex items-center cursor-pointer">
-                                <div class="relative">
-                                    <input type="checkbox" id="toggle" class="sr-only">
-                                    <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
-                                    <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
-                                </div>
-                            </label>
-                        </div>
-                         <div class="flex items-center justify-between">
-                            <span class="text-gray-700">Dark Mode</span>
-                            <label for="toggle2" class="flex items-center cursor-pointer">
-                                <div class="relative">
-                                    <input type="checkbox" id="toggle2" class="sr-only">
-                                    <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
-                                    <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
-                                </div>
-                                <style>
-                                    /* Basic toggle switch styling */
-                                    input:checked ~ .dot {
-                                        transform: translateX(100%);
-                                        background-color: #48bb78; /* Green when checked */
-                                    }
-                                     input:checked ~ .block {
-                                        background-color: #a0aec0; /* Lighter background when checked */
-                                    }
-                                </style>
-                            </label>
-                        </div>
-                         <div>
-                            <label class="block text-gray-700 text-sm font-bold mb-2" for="language">
-                                Language
-                            </label>
-                            <select id="language" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                <option>English</option>
-                                <option>Spanish</option>
-                                <option>French</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </main>
+      <aside class="w-64 bg-gray-800 text-white flex flex-col">
+        <div class="p-4 border-b border-gray-700">
+          <h1 class="text-xl font-semibold">My App</h1>
         </div>
+
+        <nav class="flex-1 p-4 space-y-2">
+          <a
+            href="#"
+            data-target="home"
+            class="nav-link block px-4 py-2 rounded hover:bg-gray-700 transition duration-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 inline-block mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+              />
+            </svg>
+            Home
+          </a>
+          <a
+            href="#"
+            data-target="profile"
+            class="nav-link block px-4 py-2 rounded hover:bg-gray-700 transition duration-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 inline-block mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+            Profile
+          </a>
+          <a
+            href="#"
+            data-target="settings"
+            class="nav-link block px-4 py-2 rounded hover:bg-gray-700 transition duration-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 inline-block mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+            Settings
+          </a>
+        </nav>
+
+        <div class="p-4 border-t border-gray-700 mt-auto">
+          <p class="text-xs text-gray-400">&copy; 2025 My App</p>
+        </div>
+      </aside>
+
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="bg-white shadow-md p-4">
+          <h2 id="content-title" class="text-xl font-semibold text-gray-700">
+            Home
+          </h2>
+        </header>
+
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+          <div id="home" class="content-section">
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+              Welcome Home!
+            </h3>
+            <p class="text-gray-600">
+              This is the main dashboard or home section of your application.
+              You can put summary information, quick links, or introductory
+              content here.
+            </p>
+            <div
+              class="mt-6 p-4 bg-blue-100 border border-blue-300 rounded text-blue-800"
+            >
+              This is a sample notification box.
+            </div>
+          </div>
+
+          <div id="profile" class="content-section">
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+              User Profile
+            </h3>
+            <p class="text-gray-600 mb-4">
+              Manage your profile information below.
+            </p>
+            <div class="bg-white p-6 rounded shadow-md">
+              <label
+                class="block text-gray-700 text-sm font-bold mb-2"
+                for="username"
+              >
+                Username
+              </label>
+              <input
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-4"
+                id="username"
+                type="text"
+                placeholder="YourUsername"
+                value="CurrentUser"
+              />
+
+              <label
+                class="block text-gray-700 text-sm font-bold mb-2"
+                for="email"
+              >
+                Email
+              </label>
+              <input
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="email"
+                type="email"
+                placeholder="your.email@example.com"
+                value="current.user@example.com"
+              />
+              <button
+                class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                type="button"
+              >
+                Save Profile
+              </button>
+            </div>
+          </div>
+
+          <div id="settings" class="content-section">
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+              Application Settings
+            </h3>
+            <p class="text-gray-600 mb-4">Configure application preferences.</p>
+            <div class="bg-white p-6 rounded shadow-md space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="text-gray-700">Enable Notifications</span>
+                <label for="toggle" class="flex items-center cursor-pointer">
+                  <div class="relative">
+                    <input type="checkbox" id="toggle" class="sr-only" />
+                    <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+                    <div
+                      class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"
+                    ></div>
+                  </div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-700">Dark Mode</span>
+                <label for="toggle2" class="flex items-center cursor-pointer">
+                  <div class="relative">
+                    <input type="checkbox" id="toggle2" class="sr-only" />
+                    <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+                    <div
+                      class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"
+                    ></div>
+                  </div>
+                  <style>
+                    /* Basic toggle switch styling */
+                    input:checked ~ .dot {
+                      transform: translateX(100%);
+                      background-color: #48bb78; /* Green when checked */
+                    }
+                    input:checked ~ .block {
+                      background-color: #a0aec0; /* Lighter background when checked */
+                    }
+                  </style>
+                </label>
+              </div>
+              <div>
+                <label
+                  class="block text-gray-700 text-sm font-bold mb-2"
+                  for="language"
+                >
+                  Language
+                </label>
+                <select
+                  id="language"
+                  class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                >
+                  <option>English</option>
+                  <option>Spanish</option>
+                  <option>French</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
 
     <script>
-        // Get references to elements
-        const navLinks = document.querySelectorAll('.nav-link');
-        const contentSections = document.querySelectorAll('.content-section');
-        const contentTitle = document.getElementById('content-title');
+      // Get references to elements
+      const navLinks = document.querySelectorAll('.nav-link');
+      const contentSections = document.querySelectorAll('.content-section');
+      const contentTitle = document.getElementById('content-title');
 
-        // Function to switch content sections
-        function showSection(targetId) {
-            // Hide all sections
-            contentSections.forEach(section => {
-                section.classList.remove('visible');
-            });
-
-            // Show the target section
-            const targetSection = document.getElementById(targetId);
-            if (targetSection) {
-                targetSection.classList.add('visible');
-                // Update the header title (optional)
-                // Capitalize first letter for title
-                contentTitle.textContent = targetId.charAt(0).toUpperCase() + targetId.slice(1);
-            } else {
-                console.error(`Content section with id "${targetId}" not found.`);
-                // Optionally show a default or error section
-                document.getElementById('home').classList.add('visible');
-                contentTitle.textContent = 'Home';
-            }
-        }
-
-        // Function to update active link state
-        function setActiveLink(targetId) {
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                // Check if the link's data-target matches the targetId
-                if (link.dataset.target === targetId) {
-                    link.classList.add('active');
-                }
-            });
-        }
-
-        // Add click event listeners to navigation links
-        navLinks.forEach(link => {
-            link.addEventListener('click', (event) => {
-                event.preventDefault(); // Prevent default anchor link behavior
-                const targetId = link.dataset.target; // Get the target section id from data attribute
-
-                // Show the corresponding section
-                showSection(targetId);
-
-                // Update the active state of the links
-                setActiveLink(targetId);
-            });
+      // Function to switch content sections
+      function showSection(targetId) {
+        // Hide all sections
+        contentSections.forEach((section) => {
+          section.classList.remove('visible');
         });
 
-        // Initialize the app: Show the 'home' section by default on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            const defaultSection = 'home';
-            showSection(defaultSection);
-            setActiveLink(defaultSection);
-        });
+        // Show the target section
+        const targetSection = document.getElementById(targetId);
+        if (targetSection) {
+          targetSection.classList.add('visible');
+          // Update the header title (optional)
+          // Capitalize first letter for title
+          contentTitle.textContent =
+            targetId.charAt(0).toUpperCase() + targetId.slice(1);
+        } else {
+          console.error(`Content section with id "${targetId}" not found.`);
+          // Optionally show a default or error section
+          document.getElementById('home').classList.add('visible');
+          contentTitle.textContent = 'Home';
+        }
+      }
 
+      // Function to update active link state
+      function setActiveLink(targetId) {
+        navLinks.forEach((link) => {
+          link.classList.remove('active');
+          // Check if the link's data-target matches the targetId
+          if (link.dataset.target === targetId) {
+            link.classList.add('active');
+          }
+        });
+      }
+
+      // Add click event listeners to navigation links
+      navLinks.forEach((link) => {
+        link.addEventListener('click', (event) => {
+          event.preventDefault(); // Prevent default anchor link behavior
+          const targetId = link.dataset.target; // Get the target section id from data attribute
+
+          // Show the corresponding section
+          showSection(targetId);
+
+          // Update the active state of the links
+          setActiveLink(targetId);
+        });
+      });
+
+      // Initialize the app: Show the 'home' section by default on page load
+      document.addEventListener('DOMContentLoaded', () => {
+        const defaultSection = 'home';
+        showSection(defaultSection);
+        setActiveLink(defaultSection);
+      });
     </script>
-
-</body>
+  </body>
 </html>
