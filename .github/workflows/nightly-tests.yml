@@ -1,0 +1,418 @@
+name: Nightly Tests
+
+on:
+  schedule:
+    # Run every night at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+        - full
+        - performance
+        - stress
+        - compatibility
+
+jobs:
+  full-test-suite:
+    name: Full Test Suite
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_suite == 'full' || github.event.inputs.test_suite == '' }}
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x, 21.x]
+        
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Run all tests with coverage
+      run: |
+        cd syferlynx-applications
+        npm run test:coverage
+      env:
+        CI: true
+        NODE_OPTIONS: '--max-old-space-size=4096'
+        
+    - name: Run extended test suite
+      run: |
+        cd syferlynx-applications
+        npm test -- --testTimeout=30000 --maxWorkers=2
+      env:
+        CI: true
+        
+    - name: Upload coverage
+      uses: actions/upload-artifact@v4
+      with:
+        name: nightly-coverage-${{ matrix.node-version }}
+        path: syferlynx-applications/coverage/
+
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_suite == 'performance' || github.event.inputs.test_suite == 'full' || github.event.inputs.test_suite == '' }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Build application
+      run: |
+        cd syferlynx-applications
+        npm run build
+        
+    - name: Install performance testing tools
+      run: |
+        npm install -g lighthouse @lhci/cli serve autocannon
+        
+    - name: Start application
+      run: |
+        cd syferlynx-applications
+        serve -s build -l 3000 &
+        sleep 10
+        
+    - name: Run Lighthouse performance audit
+      run: |
+        lighthouse http://localhost:3000 --output=json --output-path=lighthouse-report.json --chrome-flags="--headless --no-sandbox"
+        
+    - name: Run load testing
+      run: |
+        autocannon -c 10 -d 30 -j http://localhost:3000 > load-test-results.json
+        
+    - name: Analyze performance results
+      run: |
+        node -e "
+          const lighthouse = require('./lighthouse-report.json');
+          const loadTest = require('./load-test-results.json');
+          
+          console.log('=== Lighthouse Performance ===');
+          console.log('Performance Score:', lighthouse.lhr.categories.performance.score * 100);
+          console.log('First Contentful Paint:', lighthouse.lhr.audits['first-contentful-paint'].displayValue);
+          console.log('Largest Contentful Paint:', lighthouse.lhr.audits['largest-contentful-paint'].displayValue);
+          console.log('Time to Interactive:', lighthouse.lhr.audits['interactive'].displayValue);
+          
+          console.log('\n=== Load Test Results ===');
+          console.log('Requests per second:', loadTest.requests.average);
+          console.log('Average latency:', loadTest.latency.average + 'ms');
+          console.log('Throughput:', loadTest.throughput.average + ' bytes/sec');
+          
+          // Fail if performance is below thresholds
+          if (lighthouse.lhr.categories.performance.score < 0.8) {
+            console.error('❌ Performance score below 80%');
+            process.exit(1);
+          }
+          
+          if (loadTest.requests.average < 100) {
+            console.error('❌ RPS below 100');
+            process.exit(1);
+          }
+          
+          console.log('✅ Performance tests passed');
+        "
+        
+    - name: Upload performance reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-reports
+        path: |
+          lighthouse-report.json
+          load-test-results.json
+
+  stress-tests:
+    name: Stress Tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_suite == 'stress' || github.event.inputs.test_suite == 'full' || github.event.inputs.test_suite == '' }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Run memory stress tests
+      run: |
+        cd syferlynx-applications
+        node -e "
+          // Memory stress test
+          console.log('Starting memory stress test...');
+          const initialMemory = process.memoryUsage();
+          console.log('Initial memory:', initialMemory);
+          
+          // Simulate memory intensive operations
+          const arrays = [];
+          for (let i = 0; i < 1000; i++) {
+            arrays.push(new Array(10000).fill(Math.random()));
+          }
+          
+          const peakMemory = process.memoryUsage();
+          console.log('Peak memory:', peakMemory);
+          
+          // Cleanup
+          arrays.length = 0;
+          global.gc && global.gc();
+          
+          const finalMemory = process.memoryUsage();
+          console.log('Final memory:', finalMemory);
+          
+          // Check for memory leaks
+          const memoryIncrease = finalMemory.heapUsed - initialMemory.heapUsed;
+          if (memoryIncrease > 50 * 1024 * 1024) { // 50MB threshold
+            console.error('❌ Potential memory leak detected');
+            process.exit(1);
+          }
+          
+          console.log('✅ Memory stress test passed');
+        " --expose-gc
+        
+    - name: Run CPU stress tests
+      run: |
+        cd syferlynx-applications
+        npm test -- --testNamePattern="stress" --testTimeout=60000 --maxWorkers=1
+      env:
+        CI: true
+        
+    - name: Run concurrent user simulation
+      run: |
+        cd syferlynx-applications
+        npm run build
+        serve -s build -l 3000 &
+        sleep 10
+        
+        # Simulate 50 concurrent users
+        autocannon -c 50 -d 60 -j http://localhost:3000 > stress-test-results.json
+        
+        node -e "
+          const results = require('./stress-test-results.json');
+          console.log('Concurrent users test results:');
+          console.log('Average RPS:', results.requests.average);
+          console.log('Error rate:', (results.errors / results.requests.total * 100).toFixed(2) + '%');
+          
+          if (results.errors / results.requests.total > 0.01) { // 1% error threshold
+            console.error('❌ Error rate too high under stress');
+            process.exit(1);
+          }
+          
+          console.log('✅ Stress test passed');
+        "
+
+  compatibility-tests:
+    name: Compatibility Tests
+    runs-on: ${{ matrix.os }}
+    if: ${{ github.event.inputs.test_suite == 'compatibility' || github.event.inputs.test_suite == 'full' || github.event.inputs.test_suite == '' }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [16.x, 18.x, 20.x]
+        
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Run compatibility tests
+      run: |
+        cd syferlynx-applications
+        npm run test:ci
+      env:
+        CI: true
+        
+    - name: Test build on platform
+      run: |
+        cd syferlynx-applications
+        npm run build
+        
+    - name: Platform-specific tests
+      shell: bash
+      run: |
+        cd syferlynx-applications
+        echo "Testing on ${{ matrix.os }} with Node.js ${{ matrix.node-version }}"
+        
+        # Test file permissions (Unix-like systems)
+        if [[ "${{ matrix.os }}" != "windows-latest" ]]; then
+          find build -type f -name "*.js" -exec test -r {} \; || exit 1
+          find build -type f -name "*.css" -exec test -r {} \; || exit 1
+        fi
+        
+        # Test build size
+        if command -v du &> /dev/null; then
+          BUILD_SIZE=$(du -sh build | cut -f1)
+          echo "Build size: $BUILD_SIZE"
+        fi
+        
+        echo "✅ Platform compatibility test passed"
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Run comprehensive security audit
+      run: |
+        cd syferlynx-applications
+        npm audit --audit-level=low --json > security-audit.json || true
+        
+    - name: Analyze security results
+      run: |
+        cd syferlynx-applications
+        node -e "
+          const audit = require('./security-audit.json');
+          
+          if (audit.metadata) {
+            console.log('Security Audit Results:');
+            console.log('Total vulnerabilities:', audit.metadata.vulnerabilities.total);
+            console.log('Critical:', audit.metadata.vulnerabilities.critical);
+            console.log('High:', audit.metadata.vulnerabilities.high);
+            console.log('Moderate:', audit.metadata.vulnerabilities.moderate);
+            console.log('Low:', audit.metadata.vulnerabilities.low);
+            
+            if (audit.metadata.vulnerabilities.critical > 0 || audit.metadata.vulnerabilities.high > 0) {
+              console.error('❌ Critical or high severity vulnerabilities found');
+              process.exit(1);
+            }
+          }
+          
+          console.log('✅ Security audit passed');
+        "
+        
+    - name: Upload security report
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-audit-report
+        path: syferlynx-applications/security-audit.json
+
+  nightly-summary:
+    name: Nightly Test Summary
+    runs-on: ubuntu-latest
+    needs: [full-test-suite, performance-tests, stress-tests, compatibility-tests, security-audit]
+    if: always()
+    
+    steps:
+    - name: Generate summary report
+      run: |
+        echo "# Nightly Test Results - $(date)" > nightly-report.md
+        echo "" >> nightly-report.md
+        echo "## Test Results Summary" >> nightly-report.md
+        echo "" >> nightly-report.md
+        echo "- Full Test Suite: ${{ needs.full-test-suite.result }}" >> nightly-report.md
+        echo "- Performance Tests: ${{ needs.performance-tests.result }}" >> nightly-report.md
+        echo "- Stress Tests: ${{ needs.stress-tests.result }}" >> nightly-report.md
+        echo "- Compatibility Tests: ${{ needs.compatibility-tests.result }}" >> nightly-report.md
+        echo "- Security Audit: ${{ needs.security-audit.result }}" >> nightly-report.md
+        echo "" >> nightly-report.md
+        
+        # Overall status
+        if [[ "${{ needs.full-test-suite.result }}" == "success" && 
+              "${{ needs.performance-tests.result }}" == "success" && 
+              "${{ needs.stress-tests.result }}" == "success" && 
+              "${{ needs.compatibility-tests.result }}" == "success" && 
+              "${{ needs.security-audit.result }}" == "success" ]]; then
+          echo "## ✅ Overall Status: PASSED" >> nightly-report.md
+          echo "All nightly tests completed successfully!" >> nightly-report.md
+        else
+          echo "## ❌ Overall Status: FAILED" >> nightly-report.md
+          echo "Some nightly tests failed. Please investigate." >> nightly-report.md
+        fi
+        
+        cat nightly-report.md
+        
+    - name: Upload nightly report
+      uses: actions/upload-artifact@v4
+      with:
+        name: nightly-test-report
+        path: nightly-report.md
+        
+    - name: Create issue on failure
+      if: needs.full-test-suite.result == 'failure' || needs.performance-tests.result == 'failure' || needs.stress-tests.result == 'failure' || needs.compatibility-tests.result == 'failure' || needs.security-audit.result == 'failure'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const title = `Nightly Tests Failed - ${new Date().toISOString().split('T')[0]}`;
+          const body = `
+          ## Nightly Test Failure Report
+          
+          The nightly test suite has failed. Please investigate the following:
+          
+          - Full Test Suite: ${{ needs.full-test-suite.result }}
+          - Performance Tests: ${{ needs.performance-tests.result }}
+          - Stress Tests: ${{ needs.stress-tests.result }}
+          - Compatibility Tests: ${{ needs.compatibility-tests.result }}
+          - Security Audit: ${{ needs.security-audit.result }}
+          
+          **Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          
+          Please check the workflow logs and artifacts for detailed information.
+          `;
+          
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: title,
+            body: body,
+            labels: ['bug', 'nightly-test-failure', 'high-priority']
+          }); 

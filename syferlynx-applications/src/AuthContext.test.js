@@ -115,11 +115,10 @@ describe('AuthContext', () => {
 
   describe('Login Functionality', () => {
     test('successful login with valid credentials', async () => {
-      const user = userEvent.setup();
-      renderWithAuthProvider();
+            renderWithAuthProvider();
       
       await act(async () => {
-        await user.click(screen.getByTestId('login-btn'));
+        await userEvent.click(screen.getByTestId('login-btn'));
       });
       
       await waitFor(() => {
@@ -157,10 +156,9 @@ describe('AuthContext', () => {
         </AuthProvider>
       );
       
-      const user = userEvent.setup();
-      
+            
       await act(async () => {
-        await user.click(screen.getByTestId('login-email-btn'));
+        await userEvent.click(screen.getByTestId('login-email-btn'));
       });
       
       await waitFor(() => {
@@ -197,10 +195,9 @@ describe('AuthContext', () => {
         </AuthProvider>
       );
       
-      const user = userEvent.setup();
-      
+            
       await act(async () => {
-        await user.click(screen.getByTestId('invalid-login-btn'));
+        await userEvent.click(screen.getByTestId('invalid-login-btn'));
       });
       
       await waitFor(() => {
@@ -213,11 +210,10 @@ describe('AuthContext', () => {
     });
 
     test('login shows loading state', async () => {
-      const user = userEvent.setup();
-      renderWithAuthProvider();
+            renderWithAuthProvider();
       
       // Start login process
-      user.click(screen.getByTestId('login-btn'));
+      userEvent.click(screen.getByTestId('login-btn'));
       
       // Should show loading immediately
       await waitFor(() => {
@@ -233,11 +229,10 @@ describe('AuthContext', () => {
 
   describe('Registration Functionality', () => {
     test('successful registration with valid data', async () => {
-      const user = userEvent.setup();
-      renderWithAuthProvider();
+            renderWithAuthProvider();
       
       await act(async () => {
-        await user.click(screen.getByTestId('register-btn'));
+        await userEvent.click(screen.getByTestId('register-btn'));
       });
       
       await waitFor(() => {
@@ -279,10 +274,9 @@ describe('AuthContext', () => {
         </AuthProvider>
       );
       
-      const user = userEvent.setup();
-      
+            
       await act(async () => {
-        await user.click(screen.getByTestId('existing-user-btn'));
+        await userEvent.click(screen.getByTestId('existing-user-btn'));
       });
       
       await waitFor(() => {
@@ -321,10 +315,9 @@ describe('AuthContext', () => {
         </AuthProvider>
       );
       
-      const user = userEvent.setup();
-      
+            
       await act(async () => {
-        await user.click(screen.getByTestId('existing-email-btn'));
+        await userEvent.click(screen.getByTestId('existing-email-btn'));
       });
       
       await waitFor(() => {
@@ -337,12 +330,11 @@ describe('AuthContext', () => {
 
   describe('Logout Functionality', () => {
     test('logout clears user state and localStorage', async () => {
-      const user = userEvent.setup();
-      renderWithAuthProvider();
+            renderWithAuthProvider();
       
       // First login
       await act(async () => {
-        await user.click(screen.getByTestId('login-btn'));
+        await userEvent.click(screen.getByTestId('login-btn'));
       });
       
       await waitFor(() => {
@@ -351,7 +343,7 @@ describe('AuthContext', () => {
       
       // Then logout
       await act(async () => {
-        await user.click(screen.getByTestId('logout-btn'));
+        await userEvent.click(screen.getByTestId('logout-btn'));
       });
       
       expect(screen.getByTestId('authenticated')).toHaveTextContent('Not Authenticated');
@@ -362,12 +354,11 @@ describe('AuthContext', () => {
 
   describe('Profile Update Functionality', () => {
     test('successful profile update', async () => {
-      const user = userEvent.setup();
-      renderWithAuthProvider();
+            renderWithAuthProvider();
       
       // First login
       await act(async () => {
-        await user.click(screen.getByTestId('login-btn'));
+        await userEvent.click(screen.getByTestId('login-btn'));
       });
       
       await waitFor(() => {
@@ -376,7 +367,7 @@ describe('AuthContext', () => {
       
       // Update profile
       await act(async () => {
-        await user.click(screen.getByTestId('update-profile-btn'));
+        await userEvent.click(screen.getByTestId('update-profile-btn'));
       });
       
       await waitFor(() => {
@@ -414,10 +405,9 @@ describe('AuthContext', () => {
         </AuthProvider>
       );
       
-      const user = userEvent.setup();
-      
+            
       await act(async () => {
-        await user.click(screen.getByTestId('update-no-user-btn'));
+        await userEvent.click(screen.getByTestId('update-no-user-btn'));
       });
       
       // This should handle the case where user is null
@@ -427,15 +417,14 @@ describe('AuthContext', () => {
 
   describe('Integration Tests', () => {
     test('complete authentication flow', async () => {
-      const user = userEvent.setup();
-      renderWithAuthProvider();
+            renderWithAuthProvider();
       
       // Start unauthenticated
       expect(screen.getByTestId('authenticated')).toHaveTextContent('Not Authenticated');
       
       // Register new user
       await act(async () => {
-        await user.click(screen.getByTestId('register-btn'));
+        await userEvent.click(screen.getByTestId('register-btn'));
       });
       
       await waitFor(() => {
@@ -444,7 +433,7 @@ describe('AuthContext', () => {
       
       // Update profile
       await act(async () => {
-        await user.click(screen.getByTestId('update-profile-btn'));
+        await userEvent.click(screen.getByTestId('update-profile-btn'));
       });
       
       await waitFor(() => {
@@ -454,14 +443,14 @@ describe('AuthContext', () => {
       
       // Logout
       await act(async () => {
-        await user.click(screen.getByTestId('logout-btn'));
+        await userEvent.click(screen.getByTestId('logout-btn'));
       });
       
       expect(screen.getByTestId('authenticated')).toHaveTextContent('Not Authenticated');
       
       // Login again
       await act(async () => {
-        await user.click(screen.getByTestId('login-btn'));
+        await userEvent.click(screen.getByTestId('login-btn'));
       });
       
       await waitFor(() => {
@@ -533,10 +522,9 @@ describe('AuthContext', () => {
         </AuthProvider>
       );
       
-      const user = userEvent.setup();
-      
+            
       await act(async () => {
-        await user.click(screen.getByTestId('network-error-btn'));
+        await userEvent.click(screen.getByTestId('network-error-btn'));
       });
       
       // The login should complete successfully in this case since we're using mock data

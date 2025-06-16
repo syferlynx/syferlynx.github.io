@@ -54,7 +54,7 @@ describe('RegisterForm Component', () => {
     });
 
     test('password visibility toggles work', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       const passwordInput = screen.getByLabelText('Password');
@@ -68,22 +68,22 @@ describe('RegisterForm Component', () => {
       expect(confirmPasswordInput.type).toBe('password');
       
       // Toggle password visibility
-      await user.click(toggleButtons[0]);
+      await userEvent.click(toggleButtons[0]);
       expect(passwordInput.type).toBe('text');
       
       // Toggle confirm password visibility
-      await user.click(toggleButtons[1]);
+      await userEvent.click(toggleButtons[1]);
       expect(confirmPasswordInput.type).toBe('text');
     });
 
     test('form inputs update correctly', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
-      await user.type(screen.getByLabelText('Username'), 'testuser');
-      await user.type(screen.getByLabelText('Email Address'), 'test@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText('Confirm Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Username'), 'testuser');
+      await userEvent.type(screen.getByLabelText('Email Address'), 'test@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'password123');
       
       expect(screen.getByLabelText('Username').value).toBe('testuser');
       expect(screen.getByLabelText('Email Address').value).toBe('test@example.com');
@@ -93,11 +93,11 @@ describe('RegisterForm Component', () => {
 
     test('toggle mode button calls onToggleMode', async () => {
       const mockToggle = jest.fn();
-      const user = userEvent.setup();
+      
       renderRegisterForm(mockToggle);
       
       const toggleButton = screen.getByText('Sign in here');
-      await user.click(toggleButton);
+      await userEvent.click(toggleButton);
       
       expect(mockToggle).toHaveBeenCalledTimes(1);
     });
@@ -105,103 +105,103 @@ describe('RegisterForm Component', () => {
 
   describe('Form Validation', () => {
     test('shows username validation errors', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       const submitButton = screen.getByRole('button', { name: 'Create Account' });
       
       // Test empty username
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
       expect(screen.getByText('Username is required')).toBeInTheDocument();
       
       // Test short username
-      await user.type(screen.getByLabelText('Username'), 'ab');
-      await user.click(submitButton);
+      await userEvent.type(screen.getByLabelText('Username'), 'ab');
+      await userEvent.click(submitButton);
       expect(screen.getByText('Username must be at least 3 characters')).toBeInTheDocument();
       
       // Test invalid characters
-      await user.clear(screen.getByLabelText('Username'));
-      await user.type(screen.getByLabelText('Username'), 'user@name');
-      await user.click(submitButton);
+      await userEvent.clear(screen.getByLabelText('Username'));
+      await userEvent.type(screen.getByLabelText('Username'), 'user@name');
+      await userEvent.click(submitButton);
       expect(screen.getByText('Username can only contain letters, numbers, and underscores')).toBeInTheDocument();
     });
 
     test('shows email validation errors', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       const submitButton = screen.getByRole('button', { name: 'Create Account' });
       
       // Test empty email
-      await user.type(screen.getByLabelText('Username'), 'validuser');
-      await user.click(submitButton);
+      await userEvent.type(screen.getByLabelText('Username'), 'validuser');
+      await userEvent.click(submitButton);
       expect(screen.getByText('Email is required')).toBeInTheDocument();
       
       // Test invalid email format
-      await user.type(screen.getByLabelText('Email Address'), 'invalid-email');
-      await user.click(submitButton);
+      await userEvent.type(screen.getByLabelText('Email Address'), 'invalid-email');
+      await userEvent.click(submitButton);
       expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
     });
 
     test('shows password validation errors', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       const submitButton = screen.getByRole('button', { name: 'Create Account' });
       
       // Fill valid username and email
-      await user.type(screen.getByLabelText('Username'), 'validuser');
-      await user.type(screen.getByLabelText('Email Address'), 'valid@example.com');
+      await userEvent.type(screen.getByLabelText('Username'), 'validuser');
+      await userEvent.type(screen.getByLabelText('Email Address'), 'valid@example.com');
       
       // Test empty password
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
       expect(screen.getByText('Password is required')).toBeInTheDocument();
       
       // Test short password
-      await user.type(screen.getByLabelText('Password'), '123');
-      await user.click(submitButton);
+      await userEvent.type(screen.getByLabelText('Password'), '123');
+      await userEvent.click(submitButton);
       expect(screen.getByText('Password must be at least 6 characters')).toBeInTheDocument();
     });
 
     test('shows confirm password validation errors', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       const submitButton = screen.getByRole('button', { name: 'Create Account' });
       
       // Fill valid data except confirm password
-      await user.type(screen.getByLabelText('Username'), 'validuser');
-      await user.type(screen.getByLabelText('Email Address'), 'valid@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Username'), 'validuser');
+      await userEvent.type(screen.getByLabelText('Email Address'), 'valid@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'password123');
       
       // Test empty confirm password
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
       expect(screen.getByText('Please confirm your password')).toBeInTheDocument();
       
       // Test mismatched passwords
-      await user.type(screen.getByLabelText('Confirm Password'), 'different');
-      await user.click(submitButton);
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'different');
+      await userEvent.click(submitButton);
       expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
     });
 
     test('field errors clear when user starts typing', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       const submitButton = screen.getByRole('button', { name: 'Create Account' });
       const usernameInput = screen.getByLabelText('Username');
       
       // Trigger validation error
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
       expect(screen.getByText('Username is required')).toBeInTheDocument();
       
       // Start typing to clear error
-      await user.type(usernameInput, 'a');
+      await userEvent.type(usernameInput, 'a');
       expect(screen.queryByText('Username is required')).not.toBeInTheDocument();
     });
 
     test('validates username format correctly', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       const usernameInput = screen.getByLabelText('Username');
@@ -211,36 +211,36 @@ describe('RegisterForm Component', () => {
       const validUsernames = ['user123', 'test_user', 'User_123'];
       
       for (const username of validUsernames) {
-        await user.clear(usernameInput);
-        await user.type(usernameInput, username);
-        await user.type(screen.getByLabelText('Email Address'), 'test@example.com');
-        await user.type(screen.getByLabelText('Password'), 'password123');
-        await user.type(screen.getByLabelText('Confirm Password'), 'password123');
-        await user.click(submitButton);
+        await userEvent.clear(usernameInput);
+        await userEvent.type(usernameInput, username);
+        await userEvent.type(screen.getByLabelText('Email Address'), 'test@example.com');
+        await userEvent.type(screen.getByLabelText('Password'), 'password123');
+        await userEvent.type(screen.getByLabelText('Confirm Password'), 'password123');
+        await userEvent.click(submitButton);
         
         expect(screen.queryByText('Username can only contain letters, numbers, and underscores')).not.toBeInTheDocument();
       }
     });
 
     test('validates email format correctly', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       const emailInput = screen.getByLabelText('Email Address');
       const submitButton = screen.getByRole('button', { name: 'Create Account' });
       
       // Fill other valid fields
-      await user.type(screen.getByLabelText('Username'), 'validuser');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText('Confirm Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Username'), 'validuser');
+      await userEvent.type(screen.getByLabelText('Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'password123');
       
       // Test invalid email formats
       const invalidEmails = ['invalid', '@example.com', 'test@', 'test@.com'];
       
       for (const email of invalidEmails) {
-        await user.clear(emailInput);
-        await user.type(emailInput, email);
-        await user.click(submitButton);
+        await userEvent.clear(emailInput);
+        await userEvent.type(emailInput, email);
+        await userEvent.click(submitButton);
         
         expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
       }
@@ -249,16 +249,16 @@ describe('RegisterForm Component', () => {
 
   describe('Form Submission', () => {
     test('successful registration submission', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       // Fill valid form data
-      await user.type(screen.getByLabelText('Username'), 'newuser');
-      await user.type(screen.getByLabelText('Email Address'), 'new@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText('Confirm Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Username'), 'newuser');
+      await userEvent.type(screen.getByLabelText('Email Address'), 'new@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'password123');
       
-      await user.click(screen.getByRole('button', { name: 'Create Account' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
       
       expect(mockAuthContext.register).toHaveBeenCalledWith('newuser', 'new@example.com', 'password123');
     });
@@ -269,16 +269,16 @@ describe('RegisterForm Component', () => {
         error: 'Username already exists' 
       });
       
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       // Fill valid form data
-      await user.type(screen.getByLabelText('Username'), 'existinguser');
-      await user.type(screen.getByLabelText('Email Address'), 'existing@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText('Confirm Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Username'), 'existinguser');
+      await userEvent.type(screen.getByLabelText('Email Address'), 'existing@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'password123');
       
-      await user.click(screen.getByRole('button', { name: 'Create Account' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
       
       await waitFor(() => {
         expect(screen.getByText('Username already exists')).toBeInTheDocument();
@@ -288,16 +288,16 @@ describe('RegisterForm Component', () => {
     test('handles registration exception', async () => {
       mockAuthContext.register.mockRejectedValue(new Error('Network error'));
       
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       // Fill valid form data
-      await user.type(screen.getByLabelText('Username'), 'newuser');
-      await user.type(screen.getByLabelText('Email Address'), 'new@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText('Confirm Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Username'), 'newuser');
+      await userEvent.type(screen.getByLabelText('Email Address'), 'new@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'password123');
       
-      await user.click(screen.getByRole('button', { name: 'Create Account' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
       
       await waitFor(() => {
         expect(screen.getByText('An unexpected error occurred')).toBeInTheDocument();
@@ -305,16 +305,16 @@ describe('RegisterForm Component', () => {
     });
 
     test('does not submit form with validation errors', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       // Fill form with validation errors
-      await user.type(screen.getByLabelText('Username'), 'ab'); // Too short
-      await user.type(screen.getByLabelText('Email Address'), 'invalid-email');
-      await user.type(screen.getByLabelText('Password'), '123'); // Too short
-      await user.type(screen.getByLabelText('Confirm Password'), 'different');
+      await userEvent.type(screen.getByLabelText('Username'), 'ab'); // Too short
+      await userEvent.type(screen.getByLabelText('Email Address'), 'invalid-email');
+      await userEvent.type(screen.getByLabelText('Password'), '123'); // Too short
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'different');
       
-      await user.click(screen.getByRole('button', { name: 'Create Account' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
       
       // Should not call register function
       expect(mockAuthContext.register).not.toHaveBeenCalled();
@@ -335,17 +335,17 @@ describe('RegisterForm Component', () => {
       });
       mockAuthContext.register.mockReturnValue(registerPromise);
       
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       // Fill valid form data
-      await user.type(screen.getByLabelText('Username'), 'newuser');
-      await user.type(screen.getByLabelText('Email Address'), 'new@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText('Confirm Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Username'), 'newuser');
+      await userEvent.type(screen.getByLabelText('Email Address'), 'new@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'password123');
       
       // Start submission
-      await user.click(screen.getByRole('button', { name: 'Create Account' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
       
       // Should show loading state
       expect(screen.getByText('Creating Account...')).toBeInTheDocument();
@@ -366,16 +366,16 @@ describe('RegisterForm Component', () => {
       });
       mockAuthContext.register.mockReturnValue(registerPromise);
       
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       // Fill valid form data
-      await user.type(screen.getByLabelText('Username'), 'newuser');
-      await user.type(screen.getByLabelText('Email Address'), 'new@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText('Confirm Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Username'), 'newuser');
+      await userEvent.type(screen.getByLabelText('Email Address'), 'new@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'password123');
       
-      await user.click(screen.getByRole('button', { name: 'Create Account' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
       
       // All form elements should be disabled during loading
       expect(screen.getByLabelText('Username')).toBeDisabled();
@@ -411,10 +411,10 @@ describe('RegisterForm Component', () => {
     });
 
     test('error messages have proper styling', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
-      await user.click(screen.getByRole('button', { name: 'Create Account' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
       
       const errorMessages = screen.getAllByText(/is required|must be/);
       errorMessages.forEach(error => {
@@ -423,10 +423,10 @@ describe('RegisterForm Component', () => {
     });
 
     test('form inputs have proper error styling when invalid', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
-      await user.click(screen.getByRole('button', { name: 'Create Account' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
       
       const usernameInput = screen.getByLabelText('Username');
       expect(usernameInput).toHaveClass('border-red-300');
@@ -435,12 +435,12 @@ describe('RegisterForm Component', () => {
 
   describe('Integration Tests', () => {
     test('complete registration flow with valid data', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       // Fill form step by step
-      await user.type(screen.getByLabelText('Username'), 'newuser123');
-      await user.type(screen.getByLabelText('Email Address'), 'newuser@example.com');
+      await userEvent.type(screen.getByLabelText('Username'), 'newuser123');
+      await userEvent.type(screen.getByLabelText('Email Address'), 'newuser@example.com');
       
       // Toggle password visibility and fill
       const passwordInput = screen.getByLabelText('Password');
@@ -449,16 +449,16 @@ describe('RegisterForm Component', () => {
         button.className.includes('absolute')
       );
       
-      await user.click(toggleButtons[0]); // Show password
-      await user.type(passwordInput, 'securepassword123');
+      await userEvent.click(toggleButtons[0]); // Show password
+      await userEvent.type(passwordInput, 'securepassword123');
       expect(passwordInput.type).toBe('text');
       
-      await user.click(toggleButtons[1]); // Show confirm password
-      await user.type(confirmPasswordInput, 'securepassword123');
+      await userEvent.click(toggleButtons[1]); // Show confirm password
+      await userEvent.type(confirmPasswordInput, 'securepassword123');
       expect(confirmPasswordInput.type).toBe('text');
       
       // Submit form
-      await user.click(screen.getByRole('button', { name: 'Create Account' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
       
       expect(mockAuthContext.register).toHaveBeenCalledWith(
         'newuser123', 
@@ -472,15 +472,15 @@ describe('RegisterForm Component', () => {
         .mockResolvedValueOnce({ success: false, error: 'Email already exists' })
         .mockResolvedValueOnce({ success: true });
       
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       // First attempt - fail
-      await user.type(screen.getByLabelText('Username'), 'newuser');
-      await user.type(screen.getByLabelText('Email Address'), 'existing@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText('Confirm Password'), 'password123');
-      await user.click(screen.getByRole('button', { name: 'Create Account' }));
+      await userEvent.type(screen.getByLabelText('Username'), 'newuser');
+      await userEvent.type(screen.getByLabelText('Email Address'), 'existing@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'password123');
+      await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
       
       await waitFor(() => {
         expect(screen.getByText('Email already exists')).toBeInTheDocument();
@@ -488,9 +488,9 @@ describe('RegisterForm Component', () => {
       
       // Retry with different email
       const emailInput = screen.getByLabelText('Email Address');
-      await user.clear(emailInput);
-      await user.type(emailInput, 'newemail@example.com');
-      await user.click(screen.getByRole('button', { name: 'Create Account' }));
+      await userEvent.clear(emailInput);
+      await userEvent.type(emailInput, 'newemail@example.com');
+      await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
       
       expect(mockAuthContext.register).toHaveBeenCalledTimes(2);
       expect(mockAuthContext.register).toHaveBeenLastCalledWith(
@@ -501,17 +501,17 @@ describe('RegisterForm Component', () => {
     });
 
     test('form submission with Enter key', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       // Fill valid form data
-      await user.type(screen.getByLabelText('Username'), 'newuser');
-      await user.type(screen.getByLabelText('Email Address'), 'new@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText('Confirm Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Username'), 'newuser');
+      await userEvent.type(screen.getByLabelText('Email Address'), 'new@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'password123');
       
       // Press Enter to submit
-      await user.keyboard('{Enter}');
+      await userEvent.keyboard('{Enter}');
       
       expect(mockAuthContext.register).toHaveBeenCalledWith('newuser', 'new@example.com', 'password123');
     });
@@ -529,7 +529,7 @@ describe('RegisterForm Component', () => {
     });
 
     test('form maintains focus management', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       const inputs = [
@@ -541,24 +541,24 @@ describe('RegisterForm Component', () => {
       
       // Tab through form elements
       for (const input of inputs) {
-        await user.tab();
+        await userEvent.tab();
         expect(input).toHaveFocus();
       }
     });
 
     test('password strength indicator behavior', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       const passwordInput = screen.getByLabelText('Password');
       
       // Test different password lengths
-      await user.type(passwordInput, '123');
-      await user.click(screen.getByRole('button', { name: 'Create Account' }));
+      await userEvent.type(passwordInput, '123');
+      await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
       expect(screen.getByText('Password must be at least 6 characters')).toBeInTheDocument();
       
-      await user.clear(passwordInput);
-      await user.type(passwordInput, '123456');
+      await userEvent.clear(passwordInput);
+      await userEvent.type(passwordInput, '123456');
       // Should not show length error anymore
       expect(screen.queryByText('Password must be at least 6 characters')).not.toBeInTheDocument();
     });
@@ -566,62 +566,62 @@ describe('RegisterForm Component', () => {
 
   describe('Edge Cases', () => {
     test('handles very long input values', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       const longString = 'a'.repeat(1000);
       const usernameInput = screen.getByLabelText('Username');
       
-      await user.type(usernameInput, longString);
+      await userEvent.type(usernameInput, longString);
       expect(usernameInput.value).toBe(longString);
     });
 
     test('handles special characters in inputs', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       // Test special characters in email (should be allowed)
       const emailInput = screen.getByLabelText('Email Address');
-      await user.type(emailInput, 'test+tag@example-domain.co.uk');
+      await userEvent.type(emailInput, 'test+tag@example-domain.co.uk');
       expect(emailInput.value).toBe('test+tag@example-domain.co.uk');
       
       // Test special characters in password (should be allowed)
       const passwordInput = screen.getByLabelText('Password');
-      await user.type(passwordInput, 'P@ssw0rd!#$');
+      await userEvent.type(passwordInput, 'P@ssw0rd!#$');
       expect(passwordInput.value).toBe('P@ssw0rd!#$');
     });
 
     test('handles rapid form submissions', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       // Fill valid form data
-      await user.type(screen.getByLabelText('Username'), 'newuser');
-      await user.type(screen.getByLabelText('Email Address'), 'new@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText('Confirm Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Username'), 'newuser');
+      await userEvent.type(screen.getByLabelText('Email Address'), 'new@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'password123');
       
       const submitButton = screen.getByRole('button', { name: 'Create Account' });
       
       // Rapid clicks should only trigger one submission due to loading state
-      await user.click(submitButton);
-      await user.click(submitButton);
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
+      await userEvent.click(submitButton);
+      await userEvent.click(submitButton);
       
       expect(mockAuthContext.register).toHaveBeenCalledTimes(1);
     });
 
     test('handles whitespace in inputs correctly', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       // Test trimming behavior
-      await user.type(screen.getByLabelText('Username'), '  testuser  ');
-      await user.type(screen.getByLabelText('Email Address'), '  test@example.com  ');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText('Confirm Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Username'), '  testuser  ');
+      await userEvent.type(screen.getByLabelText('Email Address'), '  test@example.com  ');
+      await userEvent.type(screen.getByLabelText('Password'), 'password123');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'password123');
       
-      await user.click(screen.getByRole('button', { name: 'Create Account' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
       
       // The validation should handle trimming appropriately
       // This depends on the actual implementation
@@ -630,22 +630,22 @@ describe('RegisterForm Component', () => {
 
   describe('Password Matching', () => {
     test('real-time password matching validation', async () => {
-      const user = userEvent.setup();
+      
       renderRegisterForm();
       
       const passwordInput = screen.getByLabelText('Password');
       const confirmPasswordInput = screen.getByLabelText('Confirm Password');
       
       // Fill password
-      await user.type(passwordInput, 'password123');
+      await userEvent.type(passwordInput, 'password123');
       
       // Start typing confirm password - should not match initially
-      await user.type(confirmPasswordInput, 'password12');
-      await user.click(screen.getByRole('button', { name: 'Create Account' }));
+      await userEvent.type(confirmPasswordInput, 'password12');
+      await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
       expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
       
       // Complete the matching password
-      await user.type(confirmPasswordInput, '3');
+      await userEvent.type(confirmPasswordInput, '3');
       // Error should clear when passwords match
       expect(screen.queryByText('Passwords do not match')).not.toBeInTheDocument();
     });

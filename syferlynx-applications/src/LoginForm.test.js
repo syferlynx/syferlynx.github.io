@@ -62,7 +62,7 @@ describe('LoginForm Component', () => {
     });
 
     test('password visibility toggle works', async () => {
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const passwordInput = screen.getByLabelText('Password');
@@ -72,23 +72,23 @@ describe('LoginForm Component', () => {
       expect(passwordInput.type).toBe('password');
       
       // Click toggle to show password
-      await user.click(toggleButton);
+      await userEvent.click(toggleButton);
       expect(passwordInput.type).toBe('text');
       
       // Click toggle to hide password again
-      await user.click(toggleButton);
+      await userEvent.click(toggleButton);
       expect(passwordInput.type).toBe('password');
     });
 
     test('form inputs update correctly', async () => {
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const usernameInput = screen.getByLabelText('Username or Email');
       const passwordInput = screen.getByLabelText('Password');
       
-      await user.type(usernameInput, 'testuser');
-      await user.type(passwordInput, 'testpass');
+      await userEvent.type(usernameInput, 'testuser');
+      await userEvent.type(passwordInput, 'testpass');
       
       expect(usernameInput.value).toBe('testuser');
       expect(passwordInput.value).toBe('testpass');
@@ -96,11 +96,11 @@ describe('LoginForm Component', () => {
 
     test('toggle mode button calls onToggleMode', async () => {
       const mockToggle = jest.fn();
-      const user = userEvent.setup();
+      
       renderLoginForm(mockToggle);
       
       const toggleButton = screen.getByText('Sign up here');
-      await user.click(toggleButton);
+      await userEvent.click(toggleButton);
       
       expect(mockToggle).toHaveBeenCalledTimes(1);
     });
@@ -108,70 +108,70 @@ describe('LoginForm Component', () => {
 
   describe('Form Validation', () => {
     test('shows error when submitting empty form', async () => {
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const submitButton = screen.getByRole('button', { name: 'Sign In' });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
       
       expect(screen.getByText('Please fill in all fields')).toBeInTheDocument();
     });
 
     test('shows error when username is empty', async () => {
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const passwordInput = screen.getByLabelText('Password');
       const submitButton = screen.getByRole('button', { name: 'Sign In' });
       
-      await user.type(passwordInput, 'password123');
-      await user.click(submitButton);
+      await userEvent.type(passwordInput, 'password123');
+      await userEvent.click(submitButton);
       
       expect(screen.getByText('Please fill in all fields')).toBeInTheDocument();
     });
 
     test('shows error when password is empty', async () => {
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const usernameInput = screen.getByLabelText('Username or Email');
       const submitButton = screen.getByRole('button', { name: 'Sign In' });
       
-      await user.type(usernameInput, 'testuser');
-      await user.click(submitButton);
+      await userEvent.type(usernameInput, 'testuser');
+      await userEvent.click(submitButton);
       
       expect(screen.getByText('Please fill in all fields')).toBeInTheDocument();
     });
 
     test('error clears when user starts typing', async () => {
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const usernameInput = screen.getByLabelText('Username or Email');
       const submitButton = screen.getByRole('button', { name: 'Sign In' });
       
       // Submit empty form to show error
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
       expect(screen.getByText('Please fill in all fields')).toBeInTheDocument();
       
       // Start typing to clear error
-      await user.type(usernameInput, 'a');
+      await userEvent.type(usernameInput, 'a');
       expect(screen.queryByText('Please fill in all fields')).not.toBeInTheDocument();
     });
   });
 
   describe('Form Submission', () => {
     test('successful login submission', async () => {
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const usernameInput = screen.getByLabelText('Username or Email');
       const passwordInput = screen.getByLabelText('Password');
       const submitButton = screen.getByRole('button', { name: 'Sign In' });
       
-      await user.type(usernameInput, 'admin');
-      await user.type(passwordInput, 'admin123');
-      await user.click(submitButton);
+      await userEvent.type(usernameInput, 'admin');
+      await userEvent.type(passwordInput, 'admin123');
+      await userEvent.click(submitButton);
       
       expect(mockAuthContext.login).toHaveBeenCalledWith('admin', 'admin123');
     });
@@ -182,16 +182,16 @@ describe('LoginForm Component', () => {
         error: 'Invalid credentials' 
       });
       
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const usernameInput = screen.getByLabelText('Username or Email');
       const passwordInput = screen.getByLabelText('Password');
       const submitButton = screen.getByRole('button', { name: 'Sign In' });
       
-      await user.type(usernameInput, 'invalid');
-      await user.type(passwordInput, 'invalid');
-      await user.click(submitButton);
+      await userEvent.type(usernameInput, 'invalid');
+      await userEvent.type(passwordInput, 'invalid');
+      await userEvent.click(submitButton);
       
       await waitFor(() => {
         expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
@@ -201,16 +201,16 @@ describe('LoginForm Component', () => {
     test('handles login exception', async () => {
       mockAuthContext.login.mockRejectedValue(new Error('Network error'));
       
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const usernameInput = screen.getByLabelText('Username or Email');
       const passwordInput = screen.getByLabelText('Password');
       const submitButton = screen.getByRole('button', { name: 'Sign In' });
       
-      await user.type(usernameInput, 'admin');
-      await user.type(passwordInput, 'admin123');
-      await user.click(submitButton);
+      await userEvent.type(usernameInput, 'admin');
+      await userEvent.type(passwordInput, 'admin123');
+      await userEvent.click(submitButton);
       
       await waitFor(() => {
         expect(screen.getByText('An unexpected error occurred')).toBeInTheDocument();
@@ -227,18 +227,18 @@ describe('LoginForm Component', () => {
       });
       mockAuthContext.login.mockReturnValue(loginPromise);
       
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const usernameInput = screen.getByLabelText('Username or Email');
       const passwordInput = screen.getByLabelText('Password');
       const submitButton = screen.getByRole('button', { name: 'Sign In' });
       
-      await user.type(usernameInput, 'admin');
-      await user.type(passwordInput, 'admin123');
+      await userEvent.type(usernameInput, 'admin');
+      await userEvent.type(passwordInput, 'admin123');
       
       // Start submission
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
       
       // Should show loading state
       expect(screen.getByText('Signing in...')).toBeInTheDocument();
@@ -259,7 +259,7 @@ describe('LoginForm Component', () => {
       });
       mockAuthContext.login.mockReturnValue(loginPromise);
       
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const usernameInput = screen.getByLabelText('Username or Email');
@@ -267,9 +267,9 @@ describe('LoginForm Component', () => {
       const submitButton = screen.getByRole('button', { name: 'Sign In' });
       const toggleModeButton = screen.getByText('Sign up here');
       
-      await user.type(usernameInput, 'admin');
-      await user.type(passwordInput, 'admin123');
-      await user.click(submitButton);
+      await userEvent.type(usernameInput, 'admin');
+      await userEvent.type(passwordInput, 'admin123');
+      await userEvent.click(submitButton);
       
       // All form elements should be disabled during loading
       expect(usernameInput).toBeDisabled();
@@ -299,11 +299,11 @@ describe('LoginForm Component', () => {
     });
 
     test('error messages are properly associated', async () => {
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const submitButton = screen.getByRole('button', { name: 'Sign In' });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
       
       const errorMessage = screen.getByText('Please fill in all fields');
       expect(errorMessage).toHaveClass('text-red-700');
@@ -323,22 +323,22 @@ describe('LoginForm Component', () => {
 
   describe('Integration Tests', () => {
     test('complete login flow with valid credentials', async () => {
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       // Fill form
-      await user.type(screen.getByLabelText('Username or Email'), 'admin');
-      await user.type(screen.getByLabelText('Password'), 'admin123');
+      await userEvent.type(screen.getByLabelText('Username or Email'), 'admin');
+      await userEvent.type(screen.getByLabelText('Password'), 'admin123');
       
       // Toggle password visibility
       const toggleButton = screen.getAllByRole('button').find(button => 
         button.className.includes('absolute')
       );
-      await user.click(toggleButton);
+      await userEvent.click(toggleButton);
       expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'text');
       
       // Submit form
-      await user.click(screen.getByRole('button', { name: 'Sign In' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Sign In' }));
       
       expect(mockAuthContext.login).toHaveBeenCalledWith('admin', 'admin123');
     });
@@ -348,13 +348,13 @@ describe('LoginForm Component', () => {
         .mockResolvedValueOnce({ success: false, error: 'Invalid credentials' })
         .mockResolvedValueOnce({ success: true });
       
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       // First attempt - fail
-      await user.type(screen.getByLabelText('Username or Email'), 'wrong');
-      await user.type(screen.getByLabelText('Password'), 'wrong');
-      await user.click(screen.getByRole('button', { name: 'Sign In' }));
+      await userEvent.type(screen.getByLabelText('Username or Email'), 'wrong');
+      await userEvent.type(screen.getByLabelText('Password'), 'wrong');
+      await userEvent.click(screen.getByRole('button', { name: 'Sign In' }));
       
       await waitFor(() => {
         expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
@@ -364,26 +364,26 @@ describe('LoginForm Component', () => {
       const usernameInput = screen.getByLabelText('Username or Email');
       const passwordInput = screen.getByLabelText('Password');
       
-      await user.clear(usernameInput);
-      await user.clear(passwordInput);
-      await user.type(usernameInput, 'admin');
-      await user.type(passwordInput, 'admin123');
-      await user.click(screen.getByRole('button', { name: 'Sign In' }));
+      await userEvent.clear(usernameInput);
+      await userEvent.clear(passwordInput);
+      await userEvent.type(usernameInput, 'admin');
+      await userEvent.type(passwordInput, 'admin123');
+      await userEvent.click(screen.getByRole('button', { name: 'Sign In' }));
       
       expect(mockAuthContext.login).toHaveBeenCalledTimes(2);
       expect(mockAuthContext.login).toHaveBeenLastCalledWith('admin', 'admin123');
     });
 
     test('form submission with Enter key', async () => {
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const usernameInput = screen.getByLabelText('Username or Email');
       const passwordInput = screen.getByLabelText('Password');
       
-      await user.type(usernameInput, 'admin');
-      await user.type(passwordInput, 'admin123');
-      await user.keyboard('{Enter}');
+      await userEvent.type(usernameInput, 'admin');
+      await userEvent.type(passwordInput, 'admin123');
+      await userEvent.keyboard('{Enter}');
       
       expect(mockAuthContext.login).toHaveBeenCalledWith('admin', 'admin123');
     });
@@ -408,59 +408,59 @@ describe('LoginForm Component', () => {
     });
 
     test('form maintains focus management', async () => {
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const usernameInput = screen.getByLabelText('Username or Email');
       const passwordInput = screen.getByLabelText('Password');
       
       // Tab through form elements
-      await user.tab();
+      await userEvent.tab();
       expect(usernameInput).toHaveFocus();
       
-      await user.tab();
+      await userEvent.tab();
       expect(passwordInput).toHaveFocus();
     });
   });
 
   describe('Edge Cases', () => {
     test('handles very long input values', async () => {
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const longString = 'a'.repeat(1000);
       const usernameInput = screen.getByLabelText('Username or Email');
       
-      await user.type(usernameInput, longString);
+      await userEvent.type(usernameInput, longString);
       expect(usernameInput.value).toBe(longString);
     });
 
     test('handles special characters in input', async () => {
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
       const usernameInput = screen.getByLabelText('Username or Email');
       
-      await user.type(usernameInput, specialChars);
+      await userEvent.type(usernameInput, specialChars);
       expect(usernameInput.value).toBe(specialChars);
     });
 
     test('handles rapid form submissions', async () => {
-      const user = userEvent.setup();
+      
       renderLoginForm();
       
       const usernameInput = screen.getByLabelText('Username or Email');
       const passwordInput = screen.getByLabelText('Password');
       const submitButton = screen.getByRole('button', { name: 'Sign In' });
       
-      await user.type(usernameInput, 'admin');
-      await user.type(passwordInput, 'admin123');
+      await userEvent.type(usernameInput, 'admin');
+      await userEvent.type(passwordInput, 'admin123');
       
       // Rapid clicks should only trigger one submission due to loading state
-      await user.click(submitButton);
-      await user.click(submitButton);
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
+      await userEvent.click(submitButton);
+      await userEvent.click(submitButton);
       
       expect(mockAuthContext.login).toHaveBeenCalledTimes(1);
     });

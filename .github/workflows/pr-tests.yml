@@ -1,0 +1,352 @@
+name: Pull Request Tests
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      src: ${{ steps.changes.outputs.src }}
+      tests: ${{ steps.changes.outputs.tests }}
+      config: ${{ steps.changes.outputs.config }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Detect changes
+      uses: dorny/paths-filter@v2
+      id: changes
+      with:
+        filters: |
+          src:
+            - 'syferlynx-applications/src/**'
+            - 'syferlynx-applications/public/**'
+          tests:
+            - 'syferlynx-applications/src/**/*.test.js'
+            - 'syferlynx-applications/src/**/*.test.jsx'
+          config:
+            - 'syferlynx-applications/package.json'
+            - 'syferlynx-applications/package-lock.json'
+            - 'syferlynx-applications/jest.config.js'
+
+  lint-and-format:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.src == 'true' || needs.changes.outputs.tests == 'true'
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Run ESLint
+      run: |
+        cd syferlynx-applications
+        npx eslint src/ --ext .js,.jsx --format=json --output-file=eslint-report.json || true
+        npx eslint src/ --ext .js,.jsx
+        
+    - name: Check Prettier formatting
+      run: |
+        cd syferlynx-applications
+        npx prettier --check "src/**/*.{js,jsx,json,css,md}"
+        
+    - name: Upload lint results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: lint-results
+        path: syferlynx-applications/eslint-report.json
+
+  quick-tests:
+    name: Quick Test Suite
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.src == 'true' || needs.changes.outputs.tests == 'true'
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Run unit tests
+      run: |
+        cd syferlynx-applications
+        npm run test:ci
+      env:
+        CI: true
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: quick-test-results
+        path: syferlynx-applications/coverage/
+
+  comprehensive-tests:
+    name: Comprehensive Test Suite
+    runs-on: ubuntu-latest
+    needs: [changes, quick-tests]
+    if: needs.changes.outputs.src == 'true' || needs.changes.outputs.config == 'true'
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+        
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Run all tests with coverage
+      run: |
+        cd syferlynx-applications
+        npm run test:coverage
+      env:
+        CI: true
+        
+    - name: Check coverage thresholds
+      run: |
+        cd syferlynx-applications
+        node -e "
+          const coverage = require('./coverage/coverage-summary.json');
+          const thresholds = { statements: 80, branches: 80, functions: 80, lines: 80 };
+          let failed = false;
+          
+          Object.entries(thresholds).forEach(([key, threshold]) => {
+            const actual = coverage.total[key].pct;
+            if (actual < threshold) {
+              console.error(\`❌ \${key} coverage \${actual}% is below threshold \${threshold}%\`);
+              failed = true;
+            } else {
+              console.log(\`✅ \${key} coverage \${actual}% meets threshold \${threshold}%\`);
+            }
+          });
+          
+          if (failed) process.exit(1);
+        "
+        
+    - name: Upload coverage
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-${{ matrix.node-version }}
+        path: syferlynx-applications/coverage/
+
+  build-test:
+    name: Build Test
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.src == 'true' || needs.changes.outputs.config == 'true'
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Build application
+      run: |
+        cd syferlynx-applications
+        npm run build
+        
+    - name: Test build output
+      run: |
+        cd syferlynx-applications
+        if [ ! -d "build" ]; then
+          echo "❌ Build directory not found"
+          exit 1
+        fi
+        
+        if [ ! -f "build/index.html" ]; then
+          echo "❌ index.html not found in build"
+          exit 1
+        fi
+        
+        if [ ! -d "build/static" ]; then
+          echo "❌ Static assets directory not found"
+          exit 1
+        fi
+        
+        echo "✅ Build output looks good"
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-output
+        path: syferlynx-applications/build/
+
+  security-check:
+    name: Security Check
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.config == 'true'
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Run security audit
+      run: |
+        cd syferlynx-applications
+        npm audit --audit-level=moderate
+        
+    - name: Check for known vulnerabilities
+      run: |
+        cd syferlynx-applications
+        npx audit-ci --moderate
+
+  pr-comment:
+    name: PR Comment
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, quick-tests, comprehensive-tests, build-test, security-check]
+    if: always() && github.event_name == 'pull_request'
+    
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      
+    - name: Generate PR comment
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          let comment = '## 🧪 Test Results Summary\n\n';
+          
+          // Job results
+          const jobs = {
+            'Lint & Format': '${{ needs.lint-and-format.result }}',
+            'Quick Tests': '${{ needs.quick-tests.result }}',
+            'Comprehensive Tests': '${{ needs.comprehensive-tests.result }}',
+            'Build Test': '${{ needs.build-test.result }}',
+            'Security Check': '${{ needs.security-check.result }}'
+          };
+          
+          comment += '### Job Status\n';
+          Object.entries(jobs).forEach(([name, result]) => {
+            const icon = result === 'success' ? '✅' : result === 'failure' ? '❌' : result === 'skipped' ? '⏭️' : '⚠️';
+            comment += `- ${icon} ${name}: ${result}\n`;
+          });
+          
+          comment += '\n### Coverage Report\n';
+          try {
+            const coverageFiles = fs.readdirSync('.').filter(f => f.startsWith('coverage-'));
+            if (coverageFiles.length > 0) {
+              comment += 'Coverage reports have been generated and uploaded as artifacts.\n';
+            } else {
+              comment += 'No coverage reports found.\n';
+            }
+          } catch (e) {
+            comment += 'Could not read coverage information.\n';
+          }
+          
+          comment += '\n### Next Steps\n';
+          if (jobs['Quick Tests'] === 'success' && jobs['Build Test'] === 'success') {
+            comment += '✅ All critical checks passed! This PR is ready for review.\n';
+          } else {
+            comment += '❌ Some checks failed. Please review the failed jobs and fix any issues.\n';
+          }
+          
+          // Post comment
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+  auto-merge-check:
+    name: Auto-merge Check
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, quick-tests, comprehensive-tests, build-test, security-check]
+    if: always() && github.event_name == 'pull_request'
+    
+    steps:
+    - name: Check if ready for auto-merge
+      run: |
+        if [[ "${{ needs.lint-and-format.result }}" == "success" && 
+              "${{ needs.quick-tests.result }}" == "success" && 
+              "${{ needs.comprehensive-tests.result }}" == "success" && 
+              "${{ needs.build-test.result }}" == "success" && 
+              ("${{ needs.security-check.result }}" == "success" || "${{ needs.security-check.result }}" == "skipped") ]]; then
+          echo "✅ All checks passed - PR is ready for auto-merge"
+          echo "AUTO_MERGE_READY=true" >> $GITHUB_ENV
+        else
+          echo "❌ Some checks failed - PR is not ready for auto-merge"
+          echo "AUTO_MERGE_READY=false" >> $GITHUB_ENV
+        fi
+        
+    - name: Add auto-merge label
+      if: env.AUTO_MERGE_READY == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.addLabels({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            labels: ['ready-for-merge', 'tests-passed']
+          }); 

@@ -56,11 +56,11 @@ describe('AuthWrapper Component', () => {
     });
 
     test('passes onToggleMode prop to RegisterForm when in register mode', async () => {
-      const user = userEvent.setup();
+      
       render(<AuthWrapper />);
       
       // Switch to register mode
-      await user.click(screen.getByTestId('toggle-to-register'));
+      await userEvent.click(screen.getByTestId('toggle-to-register'));
       
       const toggleButton = screen.getByTestId('toggle-to-login');
       expect(toggleButton).toBeInTheDocument();
@@ -69,7 +69,7 @@ describe('AuthWrapper Component', () => {
 
   describe('Mode Switching', () => {
     test('switches from login to register mode', async () => {
-      const user = userEvent.setup();
+      
       render(<AuthWrapper />);
       
       // Initially in login mode
@@ -77,7 +77,7 @@ describe('AuthWrapper Component', () => {
       expect(screen.queryByTestId('register-form')).not.toBeInTheDocument();
       
       // Click toggle button
-      await user.click(screen.getByTestId('toggle-to-register'));
+      await userEvent.click(screen.getByTestId('toggle-to-register'));
       
       // Should now be in register mode
       expect(screen.queryByTestId('login-form')).not.toBeInTheDocument();
@@ -86,15 +86,15 @@ describe('AuthWrapper Component', () => {
     });
 
     test('switches from register to login mode', async () => {
-      const user = userEvent.setup();
+      
       render(<AuthWrapper />);
       
       // Switch to register mode first
-      await user.click(screen.getByTestId('toggle-to-register'));
+      await userEvent.click(screen.getByTestId('toggle-to-register'));
       expect(screen.getByTestId('register-form')).toBeInTheDocument();
       
       // Switch back to login mode
-      await user.click(screen.getByTestId('toggle-to-login'));
+      await userEvent.click(screen.getByTestId('toggle-to-login'));
       
       // Should now be back in login mode
       expect(screen.getByTestId('login-form')).toBeInTheDocument();
@@ -103,40 +103,40 @@ describe('AuthWrapper Component', () => {
     });
 
     test('can toggle between modes multiple times', async () => {
-      const user = userEvent.setup();
+      
       render(<AuthWrapper />);
       
       // Start in login mode
       expect(screen.getByTestId('login-form')).toBeInTheDocument();
       
       // Toggle to register
-      await user.click(screen.getByTestId('toggle-to-register'));
+      await userEvent.click(screen.getByTestId('toggle-to-register'));
       expect(screen.getByTestId('register-form')).toBeInTheDocument();
       
       // Toggle back to login
-      await user.click(screen.getByTestId('toggle-to-login'));
+      await userEvent.click(screen.getByTestId('toggle-to-login'));
       expect(screen.getByTestId('login-form')).toBeInTheDocument();
       
       // Toggle to register again
-      await user.click(screen.getByTestId('toggle-to-register'));
+      await userEvent.click(screen.getByTestId('toggle-to-register'));
       expect(screen.getByTestId('register-form')).toBeInTheDocument();
       
       // Toggle back to login again
-      await user.click(screen.getByTestId('toggle-to-login'));
+      await userEvent.click(screen.getByTestId('toggle-to-login'));
       expect(screen.getByTestId('login-form')).toBeInTheDocument();
     });
   });
 
   describe('State Management', () => {
     test('maintains internal state correctly', async () => {
-      const user = userEvent.setup();
+      
       render(<AuthWrapper />);
       
       // Verify initial state through rendered component
       expect(screen.getByTestId('login-form')).toBeInTheDocument();
       
       // Change state
-      await user.click(screen.getByTestId('toggle-to-register'));
+      await userEvent.click(screen.getByTestId('toggle-to-register'));
       expect(screen.getByTestId('register-form')).toBeInTheDocument();
       
       // Verify state persists
@@ -144,13 +144,13 @@ describe('AuthWrapper Component', () => {
     });
 
     test('state changes are immediate', async () => {
-      const user = userEvent.setup();
+      
       render(<AuthWrapper />);
       
       const toggleButton = screen.getByTestId('toggle-to-register');
       
       // Click and immediately check
-      await user.click(toggleButton);
+      await userEvent.click(toggleButton);
       
       // Should immediately show register form
       expect(screen.getByTestId('register-form')).toBeInTheDocument();
@@ -160,18 +160,18 @@ describe('AuthWrapper Component', () => {
 
   describe('Integration Tests', () => {
     test('complete toggle workflow', async () => {
-      const user = userEvent.setup();
+      
       render(<AuthWrapper />);
       
       // Start with login form
       expect(screen.getByText('Login Form')).toBeInTheDocument();
       
       // User wants to register, clicks toggle
-      await user.click(screen.getByTestId('toggle-to-register'));
+      await userEvent.click(screen.getByTestId('toggle-to-register'));
       expect(screen.getByText('Register Form')).toBeInTheDocument();
       
       // User changes mind, wants to login instead
-      await user.click(screen.getByTestId('toggle-to-login'));
+      await userEvent.click(screen.getByTestId('toggle-to-login'));
       expect(screen.getByText('Login Form')).toBeInTheDocument();
       
       // Verify final state
@@ -179,14 +179,14 @@ describe('AuthWrapper Component', () => {
     });
 
     test('handles rapid toggling', async () => {
-      const user = userEvent.setup();
+      
       render(<AuthWrapper />);
       
       // Rapid toggle sequence
-      await user.click(screen.getByTestId('toggle-to-register'));
-      await user.click(screen.getByTestId('toggle-to-login'));
-      await user.click(screen.getByTestId('toggle-to-register'));
-      await user.click(screen.getByTestId('toggle-to-login'));
+      await userEvent.click(screen.getByTestId('toggle-to-register'));
+      await userEvent.click(screen.getByTestId('toggle-to-login'));
+      await userEvent.click(screen.getByTestId('toggle-to-register'));
+      await userEvent.click(screen.getByTestId('toggle-to-login'));
       
       // Should end up in login mode
       expect(screen.getByTestId('login-form')).toBeInTheDocument();
@@ -204,11 +204,11 @@ describe('AuthWrapper Component', () => {
     });
 
     test('maintains state across re-renders', async () => {
-      const user = userEvent.setup();
+      
       const { rerender } = render(<AuthWrapper />);
       
       // Switch to register mode
-      await user.click(screen.getByTestId('toggle-to-register'));
+      await userEvent.click(screen.getByTestId('toggle-to-register'));
       expect(screen.getByTestId('register-form')).toBeInTheDocument();
       
       // Re-render component
@@ -230,11 +230,11 @@ describe('AuthWrapper Component', () => {
     });
 
     test('correctly passes onToggleMode to RegisterForm', async () => {
-      const user = userEvent.setup();
+      
       render(<AuthWrapper />);
       
       // Switch to register mode
-      await user.click(screen.getByTestId('toggle-to-register'));
+      await userEvent.click(screen.getByTestId('toggle-to-register'));
       
       // The mock RegisterForm should receive onToggleMode prop
       // This is verified by the presence of the toggle button
@@ -242,22 +242,22 @@ describe('AuthWrapper Component', () => {
     });
 
     test('onToggleMode function works correctly for both forms', async () => {
-      const user = userEvent.setup();
+      
       render(<AuthWrapper />);
       
       // Test LoginForm's onToggleMode
-      await user.click(screen.getByTestId('toggle-to-register'));
+      await userEvent.click(screen.getByTestId('toggle-to-register'));
       expect(screen.getByTestId('register-form')).toBeInTheDocument();
       
       // Test RegisterForm's onToggleMode
-      await user.click(screen.getByTestId('toggle-to-login'));
+      await userEvent.click(screen.getByTestId('toggle-to-login'));
       expect(screen.getByTestId('login-form')).toBeInTheDocument();
     });
   });
 
   describe('Accessibility', () => {
     test('maintains proper focus management during toggle', async () => {
-      const user = userEvent.setup();
+      
       render(<AuthWrapper />);
       
       const loginToggleButton = screen.getByTestId('toggle-to-register');
@@ -267,7 +267,7 @@ describe('AuthWrapper Component', () => {
       expect(loginToggleButton).toHaveFocus();
       
       // Click to toggle
-      await user.click(loginToggleButton);
+      await userEvent.click(loginToggleButton);
       
       // New form should be rendered
       expect(screen.getByTestId('register-form')).toBeInTheDocument();
@@ -278,13 +278,13 @@ describe('AuthWrapper Component', () => {
     });
 
     test('provides consistent interface across both modes', async () => {
-      const user = userEvent.setup();
+      
       render(<AuthWrapper />);
       
       // Both forms should have toggle buttons
       expect(screen.getByTestId('toggle-to-register')).toBeInTheDocument();
       
-      await user.click(screen.getByTestId('toggle-to-register'));
+      await userEvent.click(screen.getByTestId('toggle-to-register'));
       expect(screen.getByTestId('toggle-to-login')).toBeInTheDocument();
     });
   });
@@ -299,16 +299,16 @@ describe('AuthWrapper Component', () => {
     });
 
     test('continues to work after multiple toggles', async () => {
-      const user = userEvent.setup();
+      
       render(<AuthWrapper />);
       
       // Perform many toggles to test stability
       for (let i = 0; i < 10; i++) {
         if (i % 2 === 0) {
-          await user.click(screen.getByTestId('toggle-to-register'));
+          await userEvent.click(screen.getByTestId('toggle-to-register'));
           expect(screen.getByTestId('register-form')).toBeInTheDocument();
         } else {
-          await user.click(screen.getByTestId('toggle-to-login'));
+          await userEvent.click(screen.getByTestId('toggle-to-login'));
           expect(screen.getByTestId('login-form')).toBeInTheDocument();
         }
       }
@@ -335,11 +335,11 @@ describe('AuthWrapper Component', () => {
     });
 
     test('efficiently switches between forms', async () => {
-      const user = userEvent.setup();
+      
       render(<AuthWrapper />);
       
       // Switch to register
-      await user.click(screen.getByTestId('toggle-to-register'));
+      await userEvent.click(screen.getByTestId('toggle-to-register'));
       
       // Should only have register form
       expect(screen.queryByTestId('login-form')).not.toBeInTheDocument();

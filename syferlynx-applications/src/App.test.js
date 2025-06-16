@@ -57,27 +57,27 @@ describe('App Component', () => {
     });
 
     test('sidebar navigation works correctly', async () => {
-      const user = userEvent.setup();
+      
       renderAppWithAuth();
       
       // Click on Profile
-      await user.click(screen.getByText('Profile'));
+      await userEvent.click(screen.getByText('Profile'));
       expect(screen.getByText('User Profile')).toBeInTheDocument();
       
       // Click on Settings
-      await user.click(screen.getByText('Settings'));
+      await userEvent.click(screen.getByText('Settings'));
       expect(screen.getByText('Application Settings')).toBeInTheDocument();
       
       // Click on Tic Tac Toe
-      await user.click(screen.getByText('Tic Tac Toe'));
+      await userEvent.click(screen.getByText('Tic Tac Toe'));
       expect(screen.getByText('Next player: X')).toBeInTheDocument();
     });
 
     test('profile section renders correctly', async () => {
-      const user = userEvent.setup();
+      
       renderAppWithAuth();
       
-      await user.click(screen.getByText('Profile'));
+      await userEvent.click(screen.getByText('Profile'));
       
       expect(screen.getByDisplayValue('CurrentUser')).toBeInTheDocument();
       expect(screen.getByDisplayValue('current.user@example.com')).toBeInTheDocument();
@@ -85,10 +85,10 @@ describe('App Component', () => {
     });
 
     test('settings section renders with toggle switches', async () => {
-      const user = userEvent.setup();
+      
       renderAppWithAuth();
       
-      await user.click(screen.getByText('Settings'));
+      await userEvent.click(screen.getByText('Settings'));
       
       expect(screen.getByText('Enable Notifications')).toBeInTheDocument();
       expect(screen.getByText('Dark Mode')).toBeInTheDocument();
@@ -116,88 +116,88 @@ describe('App Component', () => {
     });
 
     test('allows players to make moves', async () => {
-      const user = userEvent.setup();
+      
       const squares = screen.getAllByRole('button').filter(button => 
         button.className.includes('w-20 h-20')
       );
       
       // First move - X
-      await user.click(squares[0]);
+      await userEvent.click(squares[0]);
       expect(squares[0]).toHaveTextContent('X');
       expect(screen.getByText('Next player: O')).toBeInTheDocument();
       
       // Second move - O
-      await user.click(squares[1]);
+      await userEvent.click(squares[1]);
       expect(squares[1]).toHaveTextContent('O');
       expect(screen.getByText('Next player: X')).toBeInTheDocument();
     });
 
     test('prevents moves on occupied squares', async () => {
-      const user = userEvent.setup();
+      
       const squares = screen.getAllByRole('button').filter(button => 
         button.className.includes('w-20 h-20')
       );
       
       // Make first move
-      await user.click(squares[0]);
+      await userEvent.click(squares[0]);
       expect(squares[0]).toHaveTextContent('X');
       
       // Try to click same square again
-      await user.click(squares[0]);
+      await userEvent.click(squares[0]);
       expect(squares[0]).toHaveTextContent('X'); // Should still be X
       expect(screen.getByText('Next player: O')).toBeInTheDocument(); // Should still be O's turn
     });
 
     test('detects horizontal win', async () => {
-      const user = userEvent.setup();
+      
       const squares = screen.getAllByRole('button').filter(button => 
         button.className.includes('w-20 h-20')
       );
       
       // X wins top row: X-X-X, O-O-_
-      await user.click(squares[0]); // X
-      await user.click(squares[3]); // O
-      await user.click(squares[1]); // X
-      await user.click(squares[4]); // O
-      await user.click(squares[2]); // X wins
+      await userEvent.click(squares[0]); // X
+      await userEvent.click(squares[3]); // O
+      await userEvent.click(squares[1]); // X
+      await userEvent.click(squares[4]); // O
+      await userEvent.click(squares[2]); // X wins
       
       expect(screen.getByText('Winner: X')).toBeInTheDocument();
     });
 
     test('detects vertical win', async () => {
-      const user = userEvent.setup();
+      
       const squares = screen.getAllByRole('button').filter(button => 
         button.className.includes('w-20 h-20')
       );
       
       // X wins first column: X-O-_, X-O-_, X-_-_
-      await user.click(squares[0]); // X
-      await user.click(squares[1]); // O
-      await user.click(squares[3]); // X
-      await user.click(squares[4]); // O
-      await user.click(squares[6]); // X wins
+      await userEvent.click(squares[0]); // X
+      await userEvent.click(squares[1]); // O
+      await userEvent.click(squares[3]); // X
+      await userEvent.click(squares[4]); // O
+      await userEvent.click(squares[6]); // X wins
       
       expect(screen.getByText('Winner: X')).toBeInTheDocument();
     });
 
     test('detects diagonal win', async () => {
-      const user = userEvent.setup();
+      
       const squares = screen.getAllByRole('button').filter(button => 
         button.className.includes('w-20 h-20')
       );
       
       // X wins diagonal: X-O-_, _-X-O, _-_-X
-      await user.click(squares[0]); // X
-      await user.click(squares[1]); // O
-      await user.click(squares[4]); // X
-      await user.click(squares[5]); // O
-      await user.click(squares[8]); // X wins
+      await userEvent.click(squares[0]); // X
+      await userEvent.click(squares[1]); // O
+      await userEvent.click(squares[4]); // X
+      await userEvent.click(squares[5]); // O
+      await userEvent.click(squares[8]); // X wins
       
       expect(screen.getByText('Winner: X')).toBeInTheDocument();
     });
 
     test('detects draw game', async () => {
-      const user = userEvent.setup();
+      
       const squares = screen.getAllByRole('button').filter(button => 
         button.className.includes('w-20 h-20')
       );
@@ -207,24 +207,24 @@ describe('App Component', () => {
       const players = ['X', 'O'];
       
       for (let i = 0; i < moves.length; i++) {
-        await user.click(squares[moves[i]]);
+        await userEvent.click(squares[moves[i]]);
       }
       
       expect(screen.getByText('Draw!')).toBeInTheDocument();
     });
 
     test('restart button resets the game', async () => {
-      const user = userEvent.setup();
+      
       const squares = screen.getAllByRole('button').filter(button => 
         button.className.includes('w-20 h-20')
       );
       
       // Make some moves
-      await user.click(squares[0]); // X
-      await user.click(squares[1]); // O
+      await userEvent.click(squares[0]); // X
+      await userEvent.click(squares[1]); // O
       
       // Click restart
-      await user.click(screen.getByText('Restart Game'));
+      await userEvent.click(screen.getByText('Restart Game'));
       
       // Check game is reset
       expect(screen.getByText('Next player: X')).toBeInTheDocument();
@@ -236,10 +236,10 @@ describe('App Component', () => {
 
   describe('Toggle Switch Tests', () => {
     test('toggle switches work correctly', async () => {
-      const user = userEvent.setup();
+      
       renderAppWithAuth();
       
-      await user.click(screen.getByText('Settings'));
+      await userEvent.click(screen.getByText('Settings'));
       
       const notificationToggle = screen.getByLabelText('Enable Notifications');
       const darkModeToggle = screen.getByLabelText('Dark Mode');
@@ -249,8 +249,8 @@ describe('App Component', () => {
       expect(darkModeToggle).not.toBeChecked();
       
       // Click to toggle
-      await user.click(notificationToggle);
-      await user.click(darkModeToggle);
+      await userEvent.click(notificationToggle);
+      await userEvent.click(darkModeToggle);
       
       expect(notificationToggle).toBeChecked();
       expect(darkModeToggle).toBeChecked();
@@ -259,44 +259,44 @@ describe('App Component', () => {
 
   describe('Integration Tests', () => {
     test('complete user workflow - navigation and game play', async () => {
-      const user = userEvent.setup();
+      
       renderAppWithAuth();
       
       // Start at home
       expect(screen.getByText('Welcome Home!')).toBeInTheDocument();
       
       // Navigate to profile
-      await user.click(screen.getByText('Profile'));
+      await userEvent.click(screen.getByText('Profile'));
       expect(screen.getByText('User Profile')).toBeInTheDocument();
       
       // Navigate to settings and toggle a switch
-      await user.click(screen.getByText('Settings'));
+      await userEvent.click(screen.getByText('Settings'));
       const toggle = screen.getByLabelText('Enable Notifications');
-      await user.click(toggle);
+      await userEvent.click(toggle);
       expect(toggle).toBeChecked();
       
       // Navigate to tic-tac-toe and play a game
-      await user.click(screen.getByText('Tic Tac Toe'));
+      await userEvent.click(screen.getByText('Tic Tac Toe'));
       const squares = screen.getAllByRole('button').filter(button => 
         button.className.includes('w-20 h-20')
       );
       
       // Play a quick game
-      await user.click(squares[0]); // X
-      await user.click(squares[1]); // O
-      await user.click(squares[3]); // X
-      await user.click(squares[4]); // O
-      await user.click(squares[6]); // X wins
+      await userEvent.click(squares[0]); // X
+      await userEvent.click(squares[1]); // O
+      await userEvent.click(squares[3]); // X
+      await userEvent.click(squares[4]); // O
+      await userEvent.click(squares[6]); // X wins
       
       expect(screen.getByText('Winner: X')).toBeInTheDocument();
       
       // Reset and verify
-      await user.click(screen.getByText('Restart Game'));
+      await userEvent.click(screen.getByText('Restart Game'));
       expect(screen.getByText('Next player: X')).toBeInTheDocument();
     });
 
     test('sidebar active state updates correctly', async () => {
-      const user = userEvent.setup();
+      
       renderAppWithAuth();
       
       // Check initial active state (Home should be active)
@@ -304,7 +304,7 @@ describe('App Component', () => {
       expect(homeLink).toHaveClass('bg-gray-700');
       
       // Click Profile and check active state
-      await user.click(screen.getByText('Profile'));
+      await userEvent.click(screen.getByText('Profile'));
       const profileLink = screen.getByText('Profile').closest('a');
       expect(profileLink).toHaveClass('bg-gray-700');
       expect(homeLink).not.toHaveClass('bg-gray-700');
@@ -312,11 +312,12 @@ describe('App Component', () => {
   });
 
   describe('Error Handling', () => {
-    test('handles missing authentication gracefully', () => {
-      // This would typically show the AuthWrapper instead
-      render(<App />);
-      // The actual behavior depends on how AuthContext handles missing provider
-      // This test ensures the app doesn't crash
+    test('throws error when used without AuthProvider', () => {
+      // App component requires AuthProvider to function
+      // This test verifies the useAuth hook correctly throws an error
+      expect(() => {
+        render(<App />);
+      }).toThrow('useAuth must be used within an AuthProvider');
     });
   });
 });
@@ -327,20 +328,20 @@ describe('calculateWinner helper function', () => {
   // The function is already tested indirectly through the game win detection tests above
   
   test('calculateWinner is working through game behavior', async () => {
-    const user = userEvent.setup();
+    
     renderAppWithAuth();
     
-    await user.click(screen.getByText('Tic Tac Toe'));
+    await userEvent.click(screen.getByText('Tic Tac Toe'));
     const squares = screen.getAllByRole('button').filter(button => 
       button.className.includes('w-20 h-20')
     );
     
     // Test that the helper function correctly identifies wins
-    await user.click(squares[0]); // X
-    await user.click(squares[3]); // O
-    await user.click(squares[1]); // X
-    await user.click(squares[4]); // O
-    await user.click(squares[2]); // X wins top row
+    await userEvent.click(squares[0]); // X
+    await userEvent.click(squares[3]); // O
+    await userEvent.click(squares[1]); // X
+    await userEvent.click(squares[4]); // O
+    await userEvent.click(squares[2]); // X wins top row
     
     expect(screen.getByText('Winner: X')).toBeInTheDocument();
   });

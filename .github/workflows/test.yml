@@ -1,0 +1,282 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of tests to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - unit
+        - integration
+        - coverage
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_type == 'unit' || github.event.inputs.test_type == 'all' || github.event.inputs.test_type == '' }}
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 21.x]
+        
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Run unit tests
+      run: |
+        cd syferlynx-applications
+        npm run test:ci
+      env:
+        CI: true
+        
+    - name: Generate test report
+      run: |
+        cd syferlynx-applications
+        npm test -- --coverage --testResultsProcessor=jest-junit --coverageReporters=text-lcov --watchAll=false
+      env:
+        CI: true
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.node-version }}
+        path: |
+          syferlynx-applications/coverage/
+          syferlynx-applications/junit.xml
+        retention-days: 30
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_type == 'integration' || github.event.inputs.test_type == 'all' || github.event.inputs.test_type == '' }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Start application
+      run: |
+        cd syferlynx-applications
+        npm start &
+        sleep 30
+      env:
+        CI: true
+        
+    - name: Wait for application to be ready
+      run: |
+        timeout 60 bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
+        
+    - name: Run integration tests
+      run: |
+        cd syferlynx-applications
+        npm run test:ci -- --testNamePattern="integration"
+      env:
+        CI: true
+        
+    - name: Stop application
+      run: |
+        pkill -f "react-scripts start" || true
+
+  coverage-analysis:
+    name: Coverage Analysis
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_type == 'coverage' || github.event.inputs.test_type == 'all' || github.event.inputs.test_type == '' }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Run tests with coverage
+      run: |
+        cd syferlynx-applications
+        npm run test:coverage
+      env:
+        CI: true
+        
+    - name: Check coverage thresholds
+      run: |
+        cd syferlynx-applications
+        npm run test:coverage -- --coverageThreshold='{"global":{"branches":80,"functions":80,"lines":80,"statements":80}}'
+      env:
+        CI: true
+        
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./syferlynx-applications/coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+        
+    - name: Comment coverage on PR
+      if: github.event_name == 'pull_request'
+      uses: romeovs/lcov-reporter-action@v0.3.1
+      with:
+        lcov-file: ./syferlynx-applications/coverage/lcov.info
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: syferlynx-applications/coverage/
+        retention-days: 30
+
+  test-matrix:
+    name: Cross-Platform Tests
+    runs-on: ${{ matrix.os }}
+    if: ${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == '' }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18.x, 20.x]
+        
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Run tests
+      run: |
+        cd syferlynx-applications
+        npm run test:ci
+      env:
+        CI: true
+
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == '' }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: syferlynx-applications/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd syferlynx-applications
+        npm ci
+        
+    - name: Build application
+      run: |
+        cd syferlynx-applications
+        npm run build
+        
+    - name: Install serve
+      run: npm install -g serve
+      
+    - name: Start built application
+      run: |
+        cd syferlynx-applications
+        serve -s build -l 3000 &
+        sleep 10
+        
+    - name: Run performance tests
+      run: |
+        cd syferlynx-applications
+        npx jest --testNamePattern="performance" --testTimeout=30000
+      env:
+        CI: true
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, coverage-analysis, test-matrix, performance-tests]
+    if: always()
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      
+    - name: Generate test summary
+      run: |
+        echo "# Test Results Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Job Status" >> $GITHUB_STEP_SUMMARY
+        echo "- Unit Tests: ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Integration Tests: ${{ needs.integration-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Coverage Analysis: ${{ needs.coverage-analysis.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Cross-Platform Tests: ${{ needs.test-matrix.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Performance Tests: ${{ needs.performance-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [[ "${{ needs.unit-tests.result }}" == "success" && "${{ needs.integration-tests.result }}" == "success" && "${{ needs.coverage-analysis.result }}" == "success" ]]; then
+          echo "✅ All critical tests passed!" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Some tests failed. Please check the individual job logs." >> $GITHUB_STEP_SUMMARY
+        fi
+        
+    - name: Fail if critical tests failed
+      if: needs.unit-tests.result == 'failure' || needs.integration-tests.result == 'failure' || needs.coverage-analysis.result == 'failure'
+      run: |
+        echo "Critical tests failed"
+        exit 1 
