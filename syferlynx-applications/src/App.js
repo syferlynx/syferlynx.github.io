@@ -84,10 +84,10 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
 
       <nav className="flex-1 p-4 space-y-2">
         {navItems.map((item) => (
-          <a key={item.id} href="#" onClick={(e) => { e.preventDefault(); setActiveSection(item.id); }}
-            className={` block px-4 py-2 rounded hover:bg-gray-700 transition duration-200 flex items-center ${activeSection === item.id ? 'bg-gray-700 font-bold border-l-4 border-blue-500 pl-3' : 'border-l-4 border-transparent' }`} >
+          <button key={item.id} onClick={() => setActiveSection(item.id)}
+            className={` block px-4 py-2 rounded hover:bg-gray-700 transition duration-200 flex items-center w-full text-left ${activeSection === item.id ? 'bg-gray-700 font-bold border-l-4 border-blue-500 pl-3' : 'border-l-4 border-transparent' }`} >
             {item.icon} {item.title}
-          </a>
+          </button>
         ))}
       </nav>
       

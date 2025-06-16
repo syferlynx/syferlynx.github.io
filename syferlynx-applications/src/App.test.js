@@ -2,51 +2,51 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
-import { AuthProvider } from './AuthContext';
+import { AuthProvider, useAuth } from './AuthContext';
 
-// Mock the AuthContext to provide authenticated user
-const MockAuthProvider = ({ children, mockUser = null }) => {
-  const mockAuthValue = {
-    user: mockUser || {
-      id: 1,
-      username: 'testuser',
-      email: 'test@example.com',
-      role: 'user'
-    },
-    login: jest.fn(),
-    register: jest.fn(),
-    logout: jest.fn(),
-    updateProfile: jest.fn(),
-    loading: false,
-    isAuthenticated: !!mockUser
-  };
+// Mock the useAuth hook to provide authenticated user
+jest.mock('./AuthContext', () => ({
+  useAuth: jest.fn(),
+  AuthProvider: ({ children }) => children
+}));
 
-  return (
-    <AuthProvider value={mockAuthValue}>
-      {children}
-    </AuthProvider>
-  );
+const mockAuthContextValue = {
+  user: {
+    id: 1,
+    username: 'CurrentUser',
+    email: 'current.user@example.com',
+    role: 'user'
+  },
+  login: jest.fn().mockResolvedValue({ success: true }),
+  register: jest.fn().mockResolvedValue({ success: true }),
+  logout: jest.fn(),
+  updateProfile: jest.fn().mockResolvedValue({ success: true }),
+  loading: false,
+  isAuthenticated: true
 };
 
 // Helper function to render App with authentication
-const renderAppWithAuth = (mockUser) => {
-  return render(
-    <MockAuthProvider mockUser={mockUser}>
-      <App />
-    </MockAuthProvider>
-  );
+const renderAppWithAuth = (customMockUser) => {
+  const mockUser = customMockUser || mockAuthContextValue;
+  useAuth.mockReturnValue(mockUser);
+  return render(<App />);
 };
 
 describe('App Component', () => {
+  beforeEach(() => {
+    // Reset and setup mock for each test
+    useAuth.mockReturnValue(mockAuthContextValue);
+  });
+
   describe('Unit Tests', () => {
     test('renders main application structure when authenticated', () => {
       renderAppWithAuth();
       
       expect(screen.getByText('My React App')).toBeInTheDocument();
-      expect(screen.getByText('Home')).toBeInTheDocument();
-      expect(screen.getByText('Profile')).toBeInTheDocument();
-      expect(screen.getByText('Settings')).toBeInTheDocument();
-      expect(screen.getByText('Tic Tac Toe')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /home/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /profile/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /settings/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /tic tac toe/i })).toBeInTheDocument();
     });
 
     test('renders home section by default', () => {
@@ -57,27 +57,25 @@ describe('App Component', () => {
     });
 
     test('sidebar navigation works correctly', async () => {
-      
       renderAppWithAuth();
       
       // Click on Profile
-      await userEvent.click(screen.getByText('Profile'));
+      await userEvent.click(screen.getByRole('button', { name: /profile/i }));
       expect(screen.getByText('User Profile')).toBeInTheDocument();
       
       // Click on Settings
-      await userEvent.click(screen.getByText('Settings'));
+      await userEvent.click(screen.getByRole('button', { name: /settings/i }));
       expect(screen.getByText('Application Settings')).toBeInTheDocument();
       
       // Click on Tic Tac Toe
-      await userEvent.click(screen.getByText('Tic Tac Toe'));
+      await userEvent.click(screen.getByRole('button', { name: /tic tac toe/i }));
       expect(screen.getByText('Next player: X')).toBeInTheDocument();
     });
 
     test('profile section renders correctly', async () => {
-      
       renderAppWithAuth();
       
-      await userEvent.click(screen.getByText('Profile'));
+      await userEvent.click(screen.getByRole('button', { name: /profile/i }));
       
       expect(screen.getByDisplayValue('CurrentUser')).toBeInTheDocument();
       expect(screen.getByDisplayValue('current.user@example.com')).toBeInTheDocument();
@@ -85,10 +83,9 @@ describe('App Component', () => {
     });
 
     test('settings section renders with toggle switches', async () => {
-      
       renderAppWithAuth();
       
-      await userEvent.click(screen.getByText('Settings'));
+      await userEvent.click(screen.getByRole('button', { name: /settings/i }));
       
       expect(screen.getByText('Enable Notifications')).toBeInTheDocument();
       expect(screen.getByText('Dark Mode')).toBeInTheDocument();
@@ -99,7 +96,7 @@ describe('App Component', () => {
   describe('Tic Tac Toe Game Tests', () => {
     beforeEach(() => {
       renderAppWithAuth();
-      fireEvent.click(screen.getByText('Tic Tac Toe'));
+      fireEvent.click(screen.getByRole('button', { name: /tic tac toe/i }));
     });
 
     test('initializes game with empty board', () => {
@@ -239,7 +236,7 @@ describe('App Component', () => {
       
       renderAppWithAuth();
       
-      await userEvent.click(screen.getByText('Settings'));
+      await userEvent.click(screen.getByRole('button', { name: /settings/i }));
       
       const notificationToggle = screen.getByLabelText('Enable Notifications');
       const darkModeToggle = screen.getByLabelText('Dark Mode');
@@ -266,17 +263,17 @@ describe('App Component', () => {
       expect(screen.getByText('Welcome Home!')).toBeInTheDocument();
       
       // Navigate to profile
-      await userEvent.click(screen.getByText('Profile'));
+      await userEvent.click(screen.getByRole('button', { name: /profile/i }));
       expect(screen.getByText('User Profile')).toBeInTheDocument();
       
       // Navigate to settings and toggle a switch
-      await userEvent.click(screen.getByText('Settings'));
+      await userEvent.click(screen.getByRole('button', { name: /settings/i }));
       const toggle = screen.getByLabelText('Enable Notifications');
       await userEvent.click(toggle);
       expect(toggle).toBeChecked();
       
       // Navigate to tic-tac-toe and play a game
-      await userEvent.click(screen.getByText('Tic Tac Toe'));
+      await userEvent.click(screen.getByRole('button', { name: /tic tac toe/i }));
       const squares = screen.getAllByRole('button').filter(button => 
         button.className.includes('w-20 h-20')
       );
@@ -300,12 +297,12 @@ describe('App Component', () => {
       renderAppWithAuth();
       
       // Check initial active state (Home should be active)
-      const homeLink = screen.getByText('Home').closest('a');
+      const homeLink = screen.getByRole('button', { name: /home/i });
       expect(homeLink).toHaveClass('bg-gray-700');
       
       // Click Profile and check active state
-      await userEvent.click(screen.getByText('Profile'));
-      const profileLink = screen.getByText('Profile').closest('a');
+      await userEvent.click(screen.getByRole('button', { name: /profile/i }));
+      const profileLink = screen.getByRole('button', { name: /profile/i });
       expect(profileLink).toHaveClass('bg-gray-700');
       expect(homeLink).not.toHaveClass('bg-gray-700');
     });
@@ -313,11 +310,17 @@ describe('App Component', () => {
 
   describe('Error Handling', () => {
     test('throws error when used without AuthProvider', () => {
-      // App component requires AuthProvider to function
-      // This test verifies the useAuth hook correctly throws an error
+      // Reset the mock to its original behavior for this test
+      useAuth.mockImplementation(() => {
+        throw new Error('useAuth must be used within an AuthProvider');
+      });
+      
       expect(() => {
         render(<App />);
       }).toThrow('useAuth must be used within an AuthProvider');
+      
+      // Restore the mock for other tests
+      useAuth.mockReturnValue(mockAuthContextValue);
     });
   });
 });
@@ -331,7 +334,7 @@ describe('calculateWinner helper function', () => {
     
     renderAppWithAuth();
     
-    await userEvent.click(screen.getByText('Tic Tac Toe'));
+    await userEvent.click(screen.getByRole('button', { name: /tic tac toe/i }));
     const squares = screen.getAllByRole('button').filter(button => 
       button.className.includes('w-20 h-20')
     );

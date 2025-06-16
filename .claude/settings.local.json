@@ -4,7 +4,9 @@
       "Bash(grep:*)",
       "Bash(find:*)",
       "Bash(npm run test:ci:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(timeout 300 npm run build)",
+      "Bash(npm test:*)"
     ],
     "deny": []
   }
