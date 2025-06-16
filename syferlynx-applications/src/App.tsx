@@ -3,47 +3,62 @@ import { useAuth } from './AuthContext';
 import AuthWrapper from './AuthWrapper';
 
 // --- Icon Components ---
-// (HomeIcon, ProfileIcon, SettingsIcon, GameIcon remain the same)
-const HomeIcon = () => (
+const HomeIcon: React.FC = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
   </svg>
 );
-const ProfileIcon = () => (
+
+const ProfileIcon: React.FC = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
   </svg>
 );
-const SettingsIcon = () => (
+
+const SettingsIcon: React.FC = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
     <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826 3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 );
-const GameIcon = () => (
+
+const GameIcon: React.FC = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
         <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 14a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 14a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
     </svg>
 );
-const LogoutIcon = () => (
+
+const LogoutIcon: React.FC = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
     <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
   </svg>
 );
 
+// Navigation item interface
+interface NavItem {
+  id: string;
+  title: string;
+  icon: React.ReactNode;
+}
+
+// Sidebar props interface
+interface SidebarProps {
+  activeSection: string;
+  setActiveSection: (section: string) => void;
+}
 
 // --- Sidebar Component ---
-const Sidebar = ({ activeSection, setActiveSection }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection }) => {
   const { user, logout } = useAuth();
   
-  const navItems = [
+  const navItems: NavItem[] = [
     { id: 'home', title: 'Home', icon: <HomeIcon /> },
     { id: 'profile', title: 'Profile', icon: <ProfileIcon /> },
     { id: 'settings', title: 'Settings', icon: <SettingsIcon /> },
     { id: 'tictactoe', title: 'Tic Tac Toe', icon: <GameIcon /> },
   ];
 
-  const handleLogout = () => {
+  const handleLogout = (): void => {
     logout();
     setActiveSection('home'); // Reset to home section after logout
   };
@@ -109,26 +124,25 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
   );
 };
 
-
 // --- Content Section Components ---
-// (HomeSection, ProfileSection, SettingsSection, ToggleSwitch remain the same)
-const HomeSection = () => (
+const HomeSection: React.FC = () => (
   <div>
     <h3 className="text-2xl font-semibold text-gray-800 mb-4">Welcome Home!</h3>
     <p className="text-gray-600">This is the main dashboard or home section of your application, built with React. You can put summary information, quick links, or introductory content here.</p>
     <div className="mt-6 p-4 bg-blue-100 border border-blue-300 rounded text-blue-800"> This is a sample notification box within a React component. </div>
   </div>
 );
-const ProfileSection = () => {
+
+const ProfileSection: React.FC = () => {
   const { user, updateProfile } = useAuth();
   const [formData, setFormData] = useState({
     username: user?.username || '',
     email: user?.email || ''
   });
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>('');
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -136,7 +150,7 @@ const ProfileSection = () => {
     if (message) setMessage(''); // Clear message when user types
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
@@ -233,8 +247,15 @@ const ProfileSection = () => {
     </div>
   );
 };
-const ToggleSwitch = ({ label, id }) => {
-    const [isChecked, setIsChecked] = useState(false);
+
+// Toggle switch props interface
+interface ToggleSwitchProps {
+  label: string;
+  id: string;
+}
+
+const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ label, id }) => {
+    const [isChecked, setIsChecked] = useState<boolean>(false);
     return (
         <div className="flex items-center justify-between">
             <span className="text-gray-700">{label}</span>
@@ -248,7 +269,8 @@ const ToggleSwitch = ({ label, id }) => {
         </div>
     );
 };
-const SettingsSection = () => (
+
+const SettingsSection: React.FC = () => (
   <div>
     <h3 className="text-2xl font-semibold text-gray-800 mb-4">Application Settings</h3>
     <p className="text-gray-600 mb-4">Configure application preferences (React version).</p>
@@ -265,11 +287,23 @@ const SettingsSection = () => (
   </div>
 );
 
-
 // --- Tic Tac Toe Game Components ---
 
-// Square Component remains the same
-function Square({ value, onSquareClick, isWinning }) {
+// Square value type
+type SquareValue = 'X' | 'O' | null;
+
+// Game GameBoard type (array of square values)
+type GameBoard = SquareValue[];
+
+// Square props interface
+interface SquareProps {
+  value: SquareValue;
+  onSquareClick: () => void;
+  isWinning?: boolean;
+}
+
+// Square Component
+const Square: React.FC<SquareProps> = ({ value, onSquareClick, isWinning = false }) => {
   const textColor = value === 'X' ? 'text-red-500' : 'text-blue-500';
   const bgColor = isWinning ? 'bg-cyan-300' : 'bg-gray-700 hover:bg-gray-600';
   return (
@@ -280,42 +314,67 @@ function Square({ value, onSquareClick, isWinning }) {
       {value}
     </button>
   );
+};
+
+// Board props interface
+interface BoardProps {
+  squares: GameBoard;
+  onPlay: (index: number) => void;
+  winningLine?: number[] | null;
 }
 
-// Board Component remains largely the same, but receives onPlay from TicTacToeGame
-function Board({ squares, onPlay, winningLine }) {
-  function renderSquare(i) {
+// Board Component
+const Board: React.FC<BoardProps> = ({ squares, onPlay, winningLine }) => {
+  const renderSquare = (i: number): React.ReactElement => {
     const isWinning = winningLine && winningLine.includes(i);
     return (
       <Square
         key={i}
         value={squares[i]}
-        onSquareClick={() => onPlay(i)} // Call the onPlay prop directly
-        isWinning={isWinning}
+        onSquareClick={() => onPlay(i)}
+        isWinning={isWinning || false}
       />
     );
+  };
+  
+  const boardRows: React.ReactElement[] = [];
+  for (let row = 0; row < 3; row++) {
+    const rowSquares: React.ReactElement[] = [];
+    for (let col = 0; col < 3; col++) {
+      rowSquares.push(renderSquare(row * 3 + col));
+    }
+    boardRows.push(<div key={row} className="flex gap-2">{rowSquares}</div>);
   }
-   const boardRows = [];
-   for (let row = 0; row < 3; row++) {
-     const rowSquares = [];
-     for (let col = 0; col < 3; col++) {
-       rowSquares.push(renderSquare(row * 3 + col));
-     }
-     boardRows.push(<div key={row} className="flex gap-2">{rowSquares}</div>);
-   }
+  
   return (
     <div className="bg-gray-900 p-4 rounded-xl shadow-lg flex flex-col gap-2">
        {boardRows}
     </div>
   );
+};
+
+// Winner result interface
+interface WinnerResult {
+  winner: SquareValue;
+  line: number[];
 }
 
-// Tic Tac Toe Game Component - NOW receives state and handlers as props
-function TicTacToeGame({ board, isXNext, onPlay, onReset }) {
-  // Calculate winner and status based on props
-  const { winner, line: winningLine } = calculateWinner(board) || {};
+// Tic Tac Toe Game props interface
+interface TicTacToeGameProps {
+  board: GameBoard;
+  isXNext: boolean;
+  onPlay: (index: number) => void;
+  onReset: () => void;
+}
 
-  let status;
+// Tic Tac Toe Game Component
+const TicTacToeGame: React.FC<TicTacToeGameProps> = ({ board, isXNext, onPlay, onReset }) => {
+  // Calculate winner and status based on props
+  const result = calculateWinner(board);
+  const winner = result?.winner;
+  const winningLine = result?.line;
+
+  let status: string;
   if (winner) {
     status = `Winner: ${winner}`;
   } else if (board.every(square => square !== null)) {
@@ -336,17 +395,17 @@ function TicTacToeGame({ board, isXNext, onPlay, onReset }) {
 
        {/* Reset Button - calls the onReset prop */}
        <button
-         onClick={onReset} // Use the passed-in reset handler
+         onClick={onReset}
          className="mt-6 px-5 py-3 text-lg cursor-pointer bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg shadow-md transition transform hover:scale-105 active:scale-95 font-['Press_Start_2P']"
        >
          Restart Game
        </button>
      </div>
   );
-}
+};
 
-// Helper function to determine the winner (can remain standalone)
-function calculateWinner(squares) {
+// Helper function to determine the winner
+function calculateWinner(squares: GameBoard): WinnerResult | null {
   const lines = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
     [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
@@ -361,18 +420,24 @@ function calculateWinner(squares) {
   return null;
 }
 
+// Content Area props interface
+interface ContentAreaProps {
+  activeSection: string;
+  tttGameBoard: GameBoard;
+  tttIsXNext: boolean;
+  onTttPlay: (index: number) => void;
+  onTttReset: () => void;
+}
 
 // --- Main Content Area Component ---
-// NOW needs to accept and pass down Tic Tac Toe state and handlers
-const ContentArea = ({
+const ContentArea: React.FC<ContentAreaProps> = ({
     activeSection,
-    tttBoard,      // <-- New prop: Tic Tac Toe board state
-    tttIsXNext,    // <-- New prop: Tic Tac Toe next player state
-    onTttPlay,     // <-- New prop: Handler for playing a move
-    onTttReset     // <-- New prop: Handler for resetting the game
+    tttGameBoard,
+    tttIsXNext,
+    onTttPlay,
+    onTttReset
 }) => {
-
-  const renderSection = () => {
+  const renderSection = (): React.ReactElement => {
     switch (activeSection) {
       case 'home':
         return <HomeSection />;
@@ -381,9 +446,8 @@ const ContentArea = ({
       case 'settings':
         return <SettingsSection />;
       case 'tictactoe':
-        // Pass the state and handlers down to TicTacToeGame
         return <TicTacToeGame
-                  board={tttBoard}
+                  board={tttGameBoard}
                   isXNext={tttIsXNext}
                   onPlay={onTttPlay}
                   onReset={onTttReset}
@@ -409,40 +473,38 @@ const ContentArea = ({
   );
 };
 
-
 // --- Main App Component ---
-// NOW holds the Tic Tac Toe state and handles authentication
-function App() {
+const App: React.FC = () => {
   const { isAuthenticated, loading } = useAuth();
   
   // State for active navigation section
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection, setActiveSection] = useState<string>('home');
 
   // --- Lifted Tic Tac Toe State ---
-  const [tttBoard, setTttBoard] = useState(Array(9).fill(null));
-  const [tttIsXNext, setTttIsXNext] = useState(true);
+  const [tttGameBoard, setTttGameBoard] = useState<GameBoard>(Array(9).fill(null));
+  const [tttIsXNext, setTttIsXNext] = useState<boolean>(true);
   // --------------------------------
 
   // --- Tic Tac Toe Handlers defined in App ---
-  function handleTttPlay(index) {
+  const handleTttPlay = (index: number): void => {
     // Ignore if already won or square filled (check winner based on current board state)
-    if (calculateWinner(tttBoard) || tttBoard[index]) {
+    if (calculateWinner(tttGameBoard) || tttGameBoard[index]) {
       return;
     }
     // Create a copy of the board state
-    const nextBoard = tttBoard.slice();
+    const nextGameBoard = tttGameBoard.slice();
     // Place 'X' or 'O'
-    nextBoard[index] = tttIsXNext ? 'X' : 'O';
+    nextGameBoard[index] = tttIsXNext ? 'X' : 'O';
     // Update state in App
-    setTttBoard(nextBoard);
+    setTttGameBoard(nextGameBoard);
     setTttIsXNext(!tttIsXNext);
-  }
+  };
 
-  function handleTttReset() {
+  const handleTttReset = (): void => {
     // Reset state in App
-    setTttBoard(Array(9).fill(null));
+    setTttGameBoard(Array(9).fill(null));
     setTttIsXNext(true);
-  }
+  };
   // -----------------------------------------
 
   // Show loading spinner while checking authentication
@@ -471,13 +533,13 @@ function App() {
       {/* ContentArea receives game state and handlers */}
       <ContentArea
         activeSection={activeSection}
-        tttBoard={tttBoard}
+        tttGameBoard={tttGameBoard}
         tttIsXNext={tttIsXNext}
         onTttPlay={handleTttPlay}
         onTttReset={handleTttReset}
       />
     </div>
   );
-}
+};
 
-export default App; // Export the main App component
+export default App;

@@ -5,7 +5,7 @@ import AuthWrapper from './AuthWrapper';
 
 // Mock the LoginForm and RegisterForm components
 jest.mock('./LoginForm', () => {
-  return function MockLoginForm({ onToggleMode }) {
+  return function MockLoginForm({ onToggleMode }: { onToggleMode: () => void }) {
     return (
       <div data-testid="login-form">
         <h1>Login Form</h1>
@@ -18,7 +18,7 @@ jest.mock('./LoginForm', () => {
 });
 
 jest.mock('./RegisterForm', () => {
-  return function MockRegisterForm({ onToggleMode }) {
+  return function MockRegisterForm({ onToggleMode }: { onToggleMode: () => void }) {
     return (
       <div data-testid="register-form">
         <h1>Register Form</h1>

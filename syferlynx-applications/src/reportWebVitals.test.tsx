@@ -37,7 +37,7 @@ describe('reportWebVitals', () => {
     });
 
     test('does nothing when null is provided', async () => {
-      await reportWebVitals(null);
+      await reportWebVitals(undefined);
       
       // Should not call any web vitals functions
       expect(mockGetCLS).not.toHaveBeenCalled();
@@ -59,11 +59,11 @@ describe('reportWebVitals', () => {
     });
 
     test('does nothing when non-function is provided', async () => {
-      await reportWebVitals('not a function');
-      await reportWebVitals(123);
-      await reportWebVitals({});
-      await reportWebVitals([]);
-      await reportWebVitals(true);
+      await reportWebVitals('not a function' as any);
+      await reportWebVitals(123 as any);
+      await reportWebVitals({} as any);
+      await reportWebVitals([] as any);
+      await reportWebVitals(true as any);
       
       // Should not call any web vitals functions
       expect(mockGetCLS).not.toHaveBeenCalled();
@@ -102,7 +102,7 @@ describe('reportWebVitals', () => {
 
     test('works with arrow function callback', async () => {
       const mockCallback = jest.fn();
-      const arrowCallback = (metric) => mockCallback(metric);
+      const arrowCallback = (metric: any) => mockCallback(metric);
       
       await reportWebVitals(arrowCallback);
       
@@ -114,7 +114,7 @@ describe('reportWebVitals', () => {
     });
 
     test('works with named function callback', async () => {
-      function namedCallback(metric) {
+      function namedCallback(metric: any) {
         // Mock implementation
       }
       
@@ -145,8 +145,8 @@ describe('reportWebVitals', () => {
 
   describe('Integration Tests', () => {
     test('complete web vitals reporting flow', async () => {
-      const metrics = [];
-      const callback = (metric) => metrics.push(metric);
+      const metrics: any[] = [];
+      const callback = (metric: any) => metrics.push(metric);
       
       // Mock the web vitals functions to call the callback
       mockGetCLS.mockImplementation((cb) => cb({ name: 'CLS', value: 0.1 }));
@@ -262,7 +262,7 @@ describe('reportWebVitals', () => {
       ];
       
       for (const nonFunction of nonFunctions) {
-        await reportWebVitals(nonFunction);
+        await reportWebVitals(nonFunction as any);
       }
       
       // Should not call web vitals functions for any non-function
@@ -291,7 +291,7 @@ describe('reportWebVitals', () => {
     test('executes efficiently with invalid callback', async () => {
       const startTime = performance.now();
       
-      await reportWebVitals('invalid');
+      await reportWebVitals('invalid' as any);
       
       const endTime = performance.now();
       const executionTime = endTime - startTime;
@@ -303,8 +303,8 @@ describe('reportWebVitals', () => {
 
   describe('Real-world Usage Scenarios', () => {
     test('works with analytics tracking', async () => {
-      const analyticsData = [];
-      const analyticsCallback = (metric) => {
+      const analyticsData: any[] = [];
+      const analyticsCallback = (metric: any) => {
         analyticsData.push({
           name: metric.name,
           value: metric.value,
@@ -342,7 +342,7 @@ describe('reportWebVitals', () => {
 
     test('works with custom metric processing', async () => {
       const processedMetrics = new Map();
-      const customProcessor = (metric) => {
+      const customProcessor = (metric: any) => {
         processedMetrics.set(metric.name, {
           value: metric.value,
           rating: metric.value < 100 ? 'good' : 'needs-improvement',

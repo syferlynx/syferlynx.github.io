@@ -57,8 +57,8 @@ describe('LoginForm Component', () => {
       const usernameInput = screen.getByLabelText('Username or Email');
       const passwordInput = screen.getByLabelText('Password');
       
-      expect(usernameInput.value).toBe('');
-      expect(passwordInput.value).toBe('');
+      expect((usernameInput as HTMLInputElement).value).toBe('');
+      expect((passwordInput as HTMLInputElement).value).toBe('');
     });
 
     test('password visibility toggle works', async () => {
@@ -69,15 +69,15 @@ describe('LoginForm Component', () => {
       const toggleButton = screen.getByRole('button', { name: '' }); // Eye icon button
       
       // Initially password should be hidden
-      expect(passwordInput.type).toBe('password');
+      expect((passwordInput as HTMLInputElement).type).toBe('password');
       
       // Click toggle to show password
-      await userEvent.click(toggleButton);
-      expect(passwordInput.type).toBe('text');
+      await userEvent.click(toggleButton!);
+      expect((passwordInput as HTMLInputElement).type).toBe('text');
       
       // Click toggle to hide password again
-      await userEvent.click(toggleButton);
-      expect(passwordInput.type).toBe('password');
+      await userEvent.click(toggleButton!);
+      expect((passwordInput as HTMLInputElement).type).toBe('password');
     });
 
     test('form inputs update correctly', async () => {
@@ -90,8 +90,8 @@ describe('LoginForm Component', () => {
       await userEvent.type(usernameInput, 'testuser');
       await userEvent.type(passwordInput, 'testpass');
       
-      expect(usernameInput.value).toBe('testuser');
-      expect(passwordInput.value).toBe('testpass');
+      expect((usernameInput as HTMLInputElement).value).toBe('testuser');
+      expect((passwordInput as HTMLInputElement).value).toBe('testpass');
     });
 
     test('toggle mode button calls onToggleMode', async () => {
@@ -100,7 +100,7 @@ describe('LoginForm Component', () => {
       renderLoginForm(mockToggle);
       
       const toggleButton = screen.getByText('Sign up here');
-      await userEvent.click(toggleButton);
+      await userEvent.click(toggleButton!);
       
       expect(mockToggle).toHaveBeenCalledTimes(1);
     });
@@ -221,7 +221,7 @@ describe('LoginForm Component', () => {
   describe('Loading States', () => {
     test('shows loading state during submission', async () => {
       // Mock login to return a promise that we can control
-      let resolveLogin;
+      let resolveLogin: ((value: any) => void) | undefined;
       const loginPromise = new Promise((resolve) => {
         resolveLogin = resolve;
       });
@@ -245,7 +245,7 @@ describe('LoginForm Component', () => {
       expect(submitButton).toBeDisabled();
       
       // Resolve the login
-      resolveLogin({ success: true });
+      resolveLogin!({ success: true });
       
       await waitFor(() => {
         expect(screen.queryByText('Signing in...')).not.toBeInTheDocument();
@@ -253,7 +253,7 @@ describe('LoginForm Component', () => {
     });
 
     test('disables form elements during loading', async () => {
-      let resolveLogin;
+      let resolveLogin: ((value: any) => void) | undefined;
       const loginPromise = new Promise((resolve) => {
         resolveLogin = resolve;
       });
@@ -277,7 +277,7 @@ describe('LoginForm Component', () => {
       expect(submitButton).toBeDisabled();
       expect(toggleModeButton).toBeDisabled();
       
-      resolveLogin({ success: true });
+      resolveLogin!({ success: true });
       
       await waitFor(() => {
         expect(usernameInput).not.toBeDisabled();
@@ -334,7 +334,7 @@ describe('LoginForm Component', () => {
       const toggleButton = screen.getAllByRole('button').find(button => 
         button.className.includes('absolute')
       );
-      await userEvent.click(toggleButton);
+      await userEvent.click(toggleButton!);
       expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'text');
       
       // Submit form
@@ -432,7 +432,7 @@ describe('LoginForm Component', () => {
       const usernameInput = screen.getByLabelText('Username or Email');
       
       await userEvent.type(usernameInput, longString);
-      expect(usernameInput.value).toBe(longString);
+      expect((usernameInput as HTMLInputElement).value).toBe(longString);
     });
 
     test('handles special characters in input', async () => {
@@ -443,7 +443,7 @@ describe('LoginForm Component', () => {
       const usernameInput = screen.getByLabelText('Username or Email');
       
       await userEvent.type(usernameInput, specialChars);
-      expect(usernameInput.value).toBe(specialChars);
+      expect((usernameInput as HTMLInputElement).value).toBe(specialChars);
     });
 
     test('handles rapid form submissions', async () => {

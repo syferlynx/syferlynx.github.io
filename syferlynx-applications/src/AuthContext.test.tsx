@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AuthProvider, useAuth } from './AuthContext';
+import { AuthProvider, useAuth, AuthResult } from './AuthContext';
 
 // Test component to access auth context
 const TestComponent = () => {
@@ -63,18 +63,20 @@ const renderWithAuthProvider = () => {
 
 // Mock localStorage
 const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
-};
+  getItem: jest.fn() as jest.Mock,
+  setItem: jest.fn() as jest.Mock,
+  removeItem: jest.fn() as jest.Mock,
+  clear: jest.fn() as jest.Mock,
+  length: 0,
+  key: jest.fn() as jest.Mock
+} as Storage;
 global.localStorage = localStorageMock;
 
 describe('AuthContext', () => {
   beforeEach(() => {
     // Clear all mocks before each test
     jest.clearAllMocks();
-    localStorageMock.getItem.mockReturnValue(null);
+    (localStorageMock.getItem as jest.Mock).mockReturnValue(null);
   });
 
   describe('Unit Tests', () => {
@@ -93,7 +95,7 @@ describe('AuthContext', () => {
         email: 'saved@example.com',
         role: 'user'
       };
-      localStorageMock.getItem.mockReturnValue(JSON.stringify(savedUser));
+      (localStorageMock.getItem as jest.Mock).mockReturnValue(JSON.stringify(savedUser));
       
       renderWithAuthProvider();
       
@@ -125,7 +127,7 @@ describe('AuthContext', () => {
         expect(screen.getByTestId('authenticated')).toHaveTextContent('Authenticated');
       });
       
-      const userData = JSON.parse(screen.getByTestId('user').textContent);
+      const userData = JSON.parse(screen.getByTestId('user').textContent!);
       expect(userData.username).toBe('admin');
       expect(userData.email).toBe('admin@example.com');
       expect(userData.role).toBe('admin');
@@ -169,7 +171,7 @@ describe('AuthContext', () => {
     test('failed login with invalid credentials', async () => {
       const TestComponentWithInvalidLogin = () => {
         const { login } = useAuth();
-        const [result, setResult] = React.useState(null);
+        const [result, setResult] = React.useState<AuthResult | null>(null);
         
         const handleLogin = async () => {
           const loginResult = await login('invalid', 'invalid');
@@ -201,7 +203,7 @@ describe('AuthContext', () => {
       });
       
       await waitFor(() => {
-        const result = JSON.parse(screen.getByTestId('login-result').textContent);
+        const result = JSON.parse(screen.getByTestId('login-result').textContent!);
         expect(result.success).toBe(false);
         expect(result.error).toBe('Invalid username or password');
       });
@@ -239,7 +241,7 @@ describe('AuthContext', () => {
         expect(screen.getByTestId('authenticated')).toHaveTextContent('Authenticated');
       });
       
-      const userData = JSON.parse(screen.getByTestId('user').textContent);
+      const userData = JSON.parse(screen.getByTestId('user').textContent!);
       expect(userData.username).toBe('newuser');
       expect(userData.email).toBe('new@example.com');
       expect(userData.role).toBe('user');
@@ -248,7 +250,7 @@ describe('AuthContext', () => {
     test('failed registration with existing username', async () => {
       const TestComponentWithExistingUser = () => {
         const { register } = useAuth();
-        const [result, setResult] = React.useState(null);
+        const [result, setResult] = React.useState<AuthResult | null>(null);
         
         const handleRegister = async () => {
           const registerResult = await register('admin', 'admin2@example.com', 'password123');
@@ -280,7 +282,7 @@ describe('AuthContext', () => {
       });
       
       await waitFor(() => {
-        const result = JSON.parse(screen.getByTestId('register-result').textContent);
+        const result = JSON.parse(screen.getByTestId('register-result').textContent!);
         expect(result.success).toBe(false);
         expect(result.error).toBe('Username or email already exists');
       });
@@ -289,7 +291,7 @@ describe('AuthContext', () => {
     test('failed registration with existing email', async () => {
       const TestComponentWithExistingEmail = () => {
         const { register } = useAuth();
-        const [result, setResult] = React.useState(null);
+        const [result, setResult] = React.useState<AuthResult | null>(null);
         
         const handleRegister = async () => {
           const registerResult = await register('newuser2', 'admin@example.com', 'password123');
@@ -321,7 +323,7 @@ describe('AuthContext', () => {
       });
       
       await waitFor(() => {
-        const result = JSON.parse(screen.getByTestId('register-result').textContent);
+        const result = JSON.parse(screen.getByTestId('register-result').textContent!);
         expect(result.success).toBe(false);
         expect(result.error).toBe('Username or email already exists');
       });
@@ -371,7 +373,7 @@ describe('AuthContext', () => {
       });
       
       await waitFor(() => {
-        const userData = JSON.parse(screen.getByTestId('user').textContent);
+        const userData = JSON.parse(screen.getByTestId('user').textContent!);
         expect(userData.username).toBe('updateduser');
       });
     });
@@ -379,7 +381,7 @@ describe('AuthContext', () => {
     test('profile update without being logged in', async () => {
       const TestComponentWithProfileUpdate = () => {
         const { updateProfile } = useAuth();
-        const [result, setResult] = React.useState(null);
+        const [result, setResult] = React.useState<AuthResult | null>(null);
         
         const handleUpdate = async () => {
           const updateResult = await updateProfile({ username: 'shouldfail' });
@@ -437,7 +439,7 @@ describe('AuthContext', () => {
       });
       
       await waitFor(() => {
-        const userData = JSON.parse(screen.getByTestId('user').textContent);
+        const userData = JSON.parse(screen.getByTestId('user').textContent!);
         expect(userData.username).toBe('updateduser');
       });
       
@@ -466,7 +468,7 @@ describe('AuthContext', () => {
         role: 'user'
       };
       
-      localStorageMock.getItem.mockReturnValue(JSON.stringify(savedUser));
+      (localStorageMock.getItem as jest.Mock).mockReturnValue(JSON.stringify(savedUser));
       
       renderWithAuthProvider();
       
@@ -478,7 +480,7 @@ describe('AuthContext', () => {
 
   describe('Error Handling', () => {
     test('handles corrupted localStorage data', () => {
-      localStorageMock.getItem.mockReturnValue('invalid json');
+      (localStorageMock.getItem as jest.Mock).mockReturnValue('invalid json');
       
       // Should not crash and should start with no user
       renderWithAuthProvider();
@@ -491,7 +493,7 @@ describe('AuthContext', () => {
       // Mock a network error by making the login function throw
       const TestComponentWithNetworkError = () => {
         const { login } = useAuth();
-        const [result, setResult] = React.useState(null);
+        const [result, setResult] = React.useState<AuthResult | null>(null);
         
         const handleLogin = async () => {
           // Simulate network error by rejecting the promise
@@ -536,7 +538,7 @@ describe('AuthContext', () => {
     test('shows loading state during initialization', () => {
       const TestComponentWithLoadingCheck = () => {
         const { loading } = useAuth();
-        const [initialLoading, setInitialLoading] = React.useState(null);
+        const [initialLoading, setInitialLoading] = React.useState<boolean | null>(null);
         
         React.useEffect(() => {
           if (initialLoading === null) {

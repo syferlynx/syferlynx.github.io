@@ -2,20 +2,20 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
-import { AuthProvider, useAuth } from './AuthContext';
+import { AuthProvider, useAuth, AuthContextType } from './AuthContext';
 
 // Mock the useAuth hook to provide authenticated user
 jest.mock('./AuthContext', () => ({
   useAuth: jest.fn(),
-  AuthProvider: ({ children }) => children
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children
 }));
 
-const mockAuthContextValue = {
+const mockAuthContextValue: AuthContextType = {
   user: {
     id: 1,
     username: 'CurrentUser',
     email: 'current.user@example.com',
-    role: 'user'
+    role: 'user' as const
   },
   login: jest.fn().mockResolvedValue({ success: true }),
   register: jest.fn().mockResolvedValue({ success: true }),
@@ -26,16 +26,16 @@ const mockAuthContextValue = {
 };
 
 // Helper function to render App with authentication
-const renderAppWithAuth = (customMockUser) => {
+const renderAppWithAuth = (customMockUser?: Partial<AuthContextType>) => {
   const mockUser = customMockUser || mockAuthContextValue;
-  useAuth.mockReturnValue(mockUser);
+  (useAuth as jest.Mock).mockReturnValue(mockUser);
   return render(<App />);
 };
 
 describe('App Component', () => {
   beforeEach(() => {
     // Reset and setup mock for each test
-    useAuth.mockReturnValue(mockAuthContextValue);
+    (useAuth as jest.Mock).mockReturnValue(mockAuthContextValue);
   });
 
   describe('Unit Tests', () => {
@@ -311,7 +311,7 @@ describe('App Component', () => {
   describe('Error Handling', () => {
     test('throws error when used without AuthProvider', () => {
       // Reset the mock to its original behavior for this test
-      useAuth.mockImplementation(() => {
+      (useAuth as jest.Mock).mockImplementation(() => {
         throw new Error('useAuth must be used within an AuthProvider');
       });
       
@@ -320,7 +320,7 @@ describe('App Component', () => {
       }).toThrow('useAuth must be used within an AuthProvider');
       
       // Restore the mock for other tests
-      useAuth.mockReturnValue(mockAuthContextValue);
+      (useAuth as jest.Mock).mockReturnValue(mockAuthContextValue);
     });
   });
 });

@@ -47,10 +47,10 @@ describe('RegisterForm Component', () => {
     test('form inputs are initially empty', () => {
       renderRegisterForm();
       
-      expect(screen.getByLabelText('Username').value).toBe('');
-      expect(screen.getByLabelText('Email Address').value).toBe('');
-      expect(screen.getByLabelText('Password').value).toBe('');
-      expect(screen.getByLabelText('Confirm Password').value).toBe('');
+      expect((screen.getByLabelText('Username') as HTMLInputElement).value).toBe('');
+      expect((screen.getByLabelText('Email Address') as HTMLInputElement).value).toBe('');
+      expect((screen.getByLabelText('Password') as HTMLInputElement).value).toBe('');
+      expect((screen.getByLabelText('Confirm Password') as HTMLInputElement).value).toBe('');
     });
 
     test('password visibility toggles work', async () => {
@@ -64,16 +64,16 @@ describe('RegisterForm Component', () => {
       );
       
       // Initially passwords should be hidden
-      expect(passwordInput.type).toBe('password');
-      expect(confirmPasswordInput.type).toBe('password');
+      expect((passwordInput as HTMLInputElement).type).toBe('password');
+      expect((confirmPasswordInput as HTMLInputElement).type).toBe('password');
       
       // Toggle password visibility
       await userEvent.click(toggleButtons[0]);
-      expect(passwordInput.type).toBe('text');
+      expect((passwordInput as HTMLInputElement).type).toBe('text');
       
       // Toggle confirm password visibility
       await userEvent.click(toggleButtons[1]);
-      expect(confirmPasswordInput.type).toBe('text');
+      expect((confirmPasswordInput as HTMLInputElement).type).toBe('text');
     });
 
     test('form inputs update correctly', async () => {
@@ -85,10 +85,10 @@ describe('RegisterForm Component', () => {
       await userEvent.type(screen.getByLabelText('Password'), 'password123');
       await userEvent.type(screen.getByLabelText('Confirm Password'), 'password123');
       
-      expect(screen.getByLabelText('Username').value).toBe('testuser');
-      expect(screen.getByLabelText('Email Address').value).toBe('test@example.com');
-      expect(screen.getByLabelText('Password').value).toBe('password123');
-      expect(screen.getByLabelText('Confirm Password').value).toBe('password123');
+      expect((screen.getByLabelText('Username') as HTMLInputElement).value).toBe('testuser');
+      expect((screen.getByLabelText('Email Address') as HTMLInputElement).value).toBe('test@example.com');
+      expect((screen.getByLabelText('Password') as HTMLInputElement).value).toBe('password123');
+      expect((screen.getByLabelText('Confirm Password') as HTMLInputElement).value).toBe('password123');
     });
 
     test('toggle mode button calls onToggleMode', async () => {
@@ -329,7 +329,7 @@ describe('RegisterForm Component', () => {
 
   describe('Loading States', () => {
     test('shows loading state during submission', async () => {
-      let resolveRegister;
+      let resolveRegister: ((value: any) => void) | undefined;
       const registerPromise = new Promise((resolve) => {
         resolveRegister = resolve;
       });
@@ -352,7 +352,7 @@ describe('RegisterForm Component', () => {
       expect(screen.getByRole('button', { name: 'Creating Account...' })).toBeDisabled();
       
       // Resolve the registration
-      resolveRegister({ success: true });
+      resolveRegister!({ success: true });
       
       await waitFor(() => {
         expect(screen.queryByText('Creating Account...')).not.toBeInTheDocument();
@@ -360,7 +360,7 @@ describe('RegisterForm Component', () => {
     });
 
     test('disables form elements during loading', async () => {
-      let resolveRegister;
+      let resolveRegister: ((value: any) => void) | undefined;
       const registerPromise = new Promise((resolve) => {
         resolveRegister = resolve;
       });
@@ -384,7 +384,7 @@ describe('RegisterForm Component', () => {
       expect(screen.getByLabelText('Confirm Password')).toBeDisabled();
       expect(screen.getByText('Sign in here')).toBeDisabled();
       
-      resolveRegister({ success: true });
+      resolveRegister!({ success: true });
       
       await waitFor(() => {
         expect(screen.getByLabelText('Username')).not.toBeDisabled();
@@ -451,11 +451,11 @@ describe('RegisterForm Component', () => {
       
       await userEvent.click(toggleButtons[0]); // Show password
       await userEvent.type(passwordInput, 'securepassword123');
-      expect(passwordInput.type).toBe('text');
+      expect((passwordInput as HTMLInputElement).type).toBe('text');
       
       await userEvent.click(toggleButtons[1]); // Show confirm password
       await userEvent.type(confirmPasswordInput, 'securepassword123');
-      expect(confirmPasswordInput.type).toBe('text');
+      expect((confirmPasswordInput as HTMLInputElement).type).toBe('text');
       
       // Submit form
       await userEvent.click(screen.getByRole('button', { name: 'Create Account' }));
@@ -573,7 +573,7 @@ describe('RegisterForm Component', () => {
       const usernameInput = screen.getByLabelText('Username');
       
       await userEvent.type(usernameInput, longString);
-      expect(usernameInput.value).toBe(longString);
+      expect((usernameInput as HTMLInputElement).value).toBe(longString);
     });
 
     test('handles special characters in inputs', async () => {
@@ -583,12 +583,12 @@ describe('RegisterForm Component', () => {
       // Test special characters in email (should be allowed)
       const emailInput = screen.getByLabelText('Email Address');
       await userEvent.type(emailInput, 'test+tag@example-domain.co.uk');
-      expect(emailInput.value).toBe('test+tag@example-domain.co.uk');
+      expect((emailInput as HTMLInputElement).value).toBe('test+tag@example-domain.co.uk');
       
       // Test special characters in password (should be allowed)
       const passwordInput = screen.getByLabelText('Password');
       await userEvent.type(passwordInput, 'P@ssw0rd!#$');
-      expect(passwordInput.value).toBe('P@ssw0rd!#$');
+      expect((passwordInput as HTMLInputElement).value).toBe('P@ssw0rd!#$');
     });
 
     test('handles rapid form submissions', async () => {
