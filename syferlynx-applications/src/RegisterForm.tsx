@@ -3,8 +3,19 @@ import { useAuth } from './AuthContext';
 
 // User Plus Icon Component
 const UserPlusIcon: React.FC = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-6 w-6"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+    />
   </svg>
 );
 
@@ -15,11 +26,26 @@ interface EyeIconProps {
 
 // Eye Icon for password visibility toggle
 const EyeIcon: React.FC<EyeIconProps> = ({ isVisible }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-5 w-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
     {isVisible ? (
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+      />
     ) : (
-      <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
+      />
     )}
   </svg>
 );
@@ -51,10 +77,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -64,13 +91,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
     // Clear specific field error when user starts typing
     if (errors[name as keyof FormErrors]) {
       setErrors({
         ...errors,
-        [name]: ''
+        [name]: '',
       });
     }
   };
@@ -84,7 +111,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
     } else if (formData.username.length < 3) {
       newErrors.username = 'Username must be at least 3 characters';
     } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-      newErrors.username = 'Username can only contain letters, numbers, and underscores';
+      newErrors.username =
+        'Username can only contain letters, numbers, and underscores';
     }
 
     // Email validation
@@ -111,7 +139,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
     return newErrors;
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setErrors({});
@@ -125,7 +155,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
     }
 
     try {
-      const result = await register(formData.username, formData.email, formData.password);
+      const result = await register(
+        formData.username,
+        formData.email,
+        formData.password
+      );
       if (!result.success) {
         setErrors({ general: result.error || 'Registration failed' });
       }
@@ -159,7 +193,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
           {/* Registration Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Username
               </label>
               <input
@@ -183,7 +220,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Email Address
               </label>
               <input
@@ -207,7 +247,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -241,7 +284,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Confirm Password
               </label>
               <div className="relative">
@@ -270,7 +316,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.confirmPassword}
+                </p>
               )}
             </div>
 

@@ -5,45 +5,44 @@ import { AuthProvider, useAuth, AuthResult } from './AuthContext';
 
 // Test component to access auth context
 const TestComponent = () => {
-  const { 
-    user, 
-    login, 
-    register, 
-    logout, 
-    updateProfile, 
-    loading, 
-    isAuthenticated 
+  const {
+    user,
+    login,
+    register,
+    logout,
+    updateProfile,
+    loading,
+    isAuthenticated,
   } = useAuth();
 
   return (
     <div>
       <div data-testid="loading">{loading ? 'Loading' : 'Not Loading'}</div>
-      <div data-testid="authenticated">{isAuthenticated ? 'Authenticated' : 'Not Authenticated'}</div>
+      <div data-testid="authenticated">
+        {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
+      </div>
       <div data-testid="user">{user ? JSON.stringify(user) : 'No User'}</div>
-      
-      <button 
-        data-testid="login-btn" 
+
+      <button
+        data-testid="login-btn"
         onClick={() => login('admin', 'admin123')}
       >
         Login
       </button>
-      
-      <button 
-        data-testid="register-btn" 
+
+      <button
+        data-testid="register-btn"
         onClick={() => register('newuser', 'new@example.com', 'password123')}
       >
         Register
       </button>
-      
-      <button 
-        data-testid="logout-btn" 
-        onClick={logout}
-      >
+
+      <button data-testid="logout-btn" onClick={logout}>
         Logout
       </button>
-      
-      <button 
-        data-testid="update-profile-btn" 
+
+      <button
+        data-testid="update-profile-btn"
         onClick={() => updateProfile({ username: 'updateduser' })}
       >
         Update Profile
@@ -68,7 +67,7 @@ const localStorageMock = {
   removeItem: jest.fn() as jest.Mock,
   clear: jest.fn() as jest.Mock,
   length: 0,
-  key: jest.fn() as jest.Mock
+  key: jest.fn() as jest.Mock,
 } as Storage;
 global.localStorage = localStorageMock;
 
@@ -82,9 +81,11 @@ describe('AuthContext', () => {
   describe('Unit Tests', () => {
     test('provides initial state correctly', () => {
       renderWithAuthProvider();
-      
+
       expect(screen.getByTestId('loading')).toHaveTextContent('Not Loading');
-      expect(screen.getByTestId('authenticated')).toHaveTextContent('Not Authenticated');
+      expect(screen.getByTestId('authenticated')).toHaveTextContent(
+        'Not Authenticated'
+      );
       expect(screen.getByTestId('user')).toHaveTextContent('No User');
     });
 
@@ -93,45 +94,55 @@ describe('AuthContext', () => {
         id: 1,
         username: 'saveduser',
         email: 'saved@example.com',
-        role: 'user'
+        role: 'user',
       };
-      (localStorageMock.getItem as jest.Mock).mockReturnValue(JSON.stringify(savedUser));
-      
+      (localStorageMock.getItem as jest.Mock).mockReturnValue(
+        JSON.stringify(savedUser)
+      );
+
       renderWithAuthProvider();
-      
-      expect(screen.getByTestId('authenticated')).toHaveTextContent('Authenticated');
-      expect(screen.getByTestId('user')).toHaveTextContent(JSON.stringify(savedUser));
+
+      expect(screen.getByTestId('authenticated')).toHaveTextContent(
+        'Authenticated'
+      );
+      expect(screen.getByTestId('user')).toHaveTextContent(
+        JSON.stringify(savedUser)
+      );
     });
 
     test('throws error when useAuth is used outside AuthProvider', () => {
       // Suppress console.error for this test
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      
+      const consoleSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
       expect(() => {
         render(<TestComponent />);
       }).toThrow('useAuth must be used within an AuthProvider');
-      
+
       consoleSpy.mockRestore();
     });
   });
 
   describe('Login Functionality', () => {
     test('successful login with valid credentials', async () => {
-            renderWithAuthProvider();
-      
+      renderWithAuthProvider();
+
       await act(async () => {
         await userEvent.click(screen.getByTestId('login-btn'));
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('authenticated')).toHaveTextContent('Authenticated');
+        expect(screen.getByTestId('authenticated')).toHaveTextContent(
+          'Authenticated'
+        );
       });
-      
+
       const userData = JSON.parse(screen.getByTestId('user').textContent!);
       expect(userData.username).toBe('admin');
       expect(userData.email).toBe('admin@example.com');
       expect(userData.role).toBe('admin');
-      
+
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'currentUser',
         expect.stringContaining('admin')
@@ -142,8 +153,8 @@ describe('AuthContext', () => {
       const TestComponentWithEmail = () => {
         const { login } = useAuth();
         return (
-          <button 
-            data-testid="login-email-btn" 
+          <button
+            data-testid="login-email-btn"
             onClick={() => login('admin@example.com', 'admin123')}
           >
             Login with Email
@@ -157,14 +168,15 @@ describe('AuthContext', () => {
           <TestComponent />
         </AuthProvider>
       );
-      
-            
+
       await act(async () => {
         await userEvent.click(screen.getByTestId('login-email-btn'));
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('authenticated')).toHaveTextContent('Authenticated');
+        expect(screen.getByTestId('authenticated')).toHaveTextContent(
+          'Authenticated'
+        );
       });
     });
 
@@ -172,12 +184,12 @@ describe('AuthContext', () => {
       const TestComponentWithInvalidLogin = () => {
         const { login } = useAuth();
         const [result, setResult] = React.useState<AuthResult | null>(null);
-        
+
         const handleLogin = async () => {
           const loginResult = await login('invalid', 'invalid');
           setResult(loginResult);
         };
-        
+
         return (
           <div>
             <button data-testid="invalid-login-btn" onClick={handleLogin}>
@@ -196,32 +208,35 @@ describe('AuthContext', () => {
           <TestComponent />
         </AuthProvider>
       );
-      
-            
+
       await act(async () => {
         await userEvent.click(screen.getByTestId('invalid-login-btn'));
       });
-      
+
       await waitFor(() => {
-        const result = JSON.parse(screen.getByTestId('login-result').textContent!);
+        const result = JSON.parse(
+          screen.getByTestId('login-result').textContent!
+        );
         expect(result.success).toBe(false);
         expect(result.error).toBe('Invalid username or password');
       });
-      
-      expect(screen.getByTestId('authenticated')).toHaveTextContent('Not Authenticated');
+
+      expect(screen.getByTestId('authenticated')).toHaveTextContent(
+        'Not Authenticated'
+      );
     });
 
     test('login shows loading state', async () => {
-            renderWithAuthProvider();
-      
+      renderWithAuthProvider();
+
       // Start login process
       userEvent.click(screen.getByTestId('login-btn'));
-      
+
       // Should show loading immediately
       await waitFor(() => {
         expect(screen.getByTestId('loading')).toHaveTextContent('Loading');
       });
-      
+
       // Wait for login to complete
       await waitFor(() => {
         expect(screen.getByTestId('loading')).toHaveTextContent('Not Loading');
@@ -231,16 +246,18 @@ describe('AuthContext', () => {
 
   describe('Registration Functionality', () => {
     test('successful registration with valid data', async () => {
-            renderWithAuthProvider();
-      
+      renderWithAuthProvider();
+
       await act(async () => {
         await userEvent.click(screen.getByTestId('register-btn'));
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('authenticated')).toHaveTextContent('Authenticated');
+        expect(screen.getByTestId('authenticated')).toHaveTextContent(
+          'Authenticated'
+        );
       });
-      
+
       const userData = JSON.parse(screen.getByTestId('user').textContent!);
       expect(userData.username).toBe('newuser');
       expect(userData.email).toBe('new@example.com');
@@ -251,12 +268,16 @@ describe('AuthContext', () => {
       const TestComponentWithExistingUser = () => {
         const { register } = useAuth();
         const [result, setResult] = React.useState<AuthResult | null>(null);
-        
+
         const handleRegister = async () => {
-          const registerResult = await register('admin', 'admin2@example.com', 'password123');
+          const registerResult = await register(
+            'admin',
+            'admin2@example.com',
+            'password123'
+          );
           setResult(registerResult);
         };
-        
+
         return (
           <div>
             <button data-testid="existing-user-btn" onClick={handleRegister}>
@@ -275,14 +296,15 @@ describe('AuthContext', () => {
           <TestComponent />
         </AuthProvider>
       );
-      
-            
+
       await act(async () => {
         await userEvent.click(screen.getByTestId('existing-user-btn'));
       });
-      
+
       await waitFor(() => {
-        const result = JSON.parse(screen.getByTestId('register-result').textContent!);
+        const result = JSON.parse(
+          screen.getByTestId('register-result').textContent!
+        );
         expect(result.success).toBe(false);
         expect(result.error).toBe('Username or email already exists');
       });
@@ -292,12 +314,16 @@ describe('AuthContext', () => {
       const TestComponentWithExistingEmail = () => {
         const { register } = useAuth();
         const [result, setResult] = React.useState<AuthResult | null>(null);
-        
+
         const handleRegister = async () => {
-          const registerResult = await register('newuser2', 'admin@example.com', 'password123');
+          const registerResult = await register(
+            'newuser2',
+            'admin@example.com',
+            'password123'
+          );
           setResult(registerResult);
         };
-        
+
         return (
           <div>
             <button data-testid="existing-email-btn" onClick={handleRegister}>
@@ -316,14 +342,15 @@ describe('AuthContext', () => {
           <TestComponent />
         </AuthProvider>
       );
-      
-            
+
       await act(async () => {
         await userEvent.click(screen.getByTestId('existing-email-btn'));
       });
-      
+
       await waitFor(() => {
-        const result = JSON.parse(screen.getByTestId('register-result').textContent!);
+        const result = JSON.parse(
+          screen.getByTestId('register-result').textContent!
+        );
         expect(result.success).toBe(false);
         expect(result.error).toBe('Username or email already exists');
       });
@@ -332,23 +359,27 @@ describe('AuthContext', () => {
 
   describe('Logout Functionality', () => {
     test('logout clears user state and localStorage', async () => {
-            renderWithAuthProvider();
-      
+      renderWithAuthProvider();
+
       // First login
       await act(async () => {
         await userEvent.click(screen.getByTestId('login-btn'));
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('authenticated')).toHaveTextContent('Authenticated');
+        expect(screen.getByTestId('authenticated')).toHaveTextContent(
+          'Authenticated'
+        );
       });
-      
+
       // Then logout
       await act(async () => {
         await userEvent.click(screen.getByTestId('logout-btn'));
       });
-      
-      expect(screen.getByTestId('authenticated')).toHaveTextContent('Not Authenticated');
+
+      expect(screen.getByTestId('authenticated')).toHaveTextContent(
+        'Not Authenticated'
+      );
       expect(screen.getByTestId('user')).toHaveTextContent('No User');
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('currentUser');
     });
@@ -356,22 +387,24 @@ describe('AuthContext', () => {
 
   describe('Profile Update Functionality', () => {
     test('successful profile update', async () => {
-            renderWithAuthProvider();
-      
+      renderWithAuthProvider();
+
       // First login
       await act(async () => {
         await userEvent.click(screen.getByTestId('login-btn'));
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('authenticated')).toHaveTextContent('Authenticated');
+        expect(screen.getByTestId('authenticated')).toHaveTextContent(
+          'Authenticated'
+        );
       });
-      
+
       // Update profile
       await act(async () => {
         await userEvent.click(screen.getByTestId('update-profile-btn'));
       });
-      
+
       await waitFor(() => {
         const userData = JSON.parse(screen.getByTestId('user').textContent!);
         expect(userData.username).toBe('updateduser');
@@ -382,12 +415,12 @@ describe('AuthContext', () => {
       const TestComponentWithProfileUpdate = () => {
         const { updateProfile } = useAuth();
         const [result, setResult] = React.useState<AuthResult | null>(null);
-        
+
         const handleUpdate = async () => {
           const updateResult = await updateProfile({ username: 'shouldfail' });
           setResult(updateResult);
         };
-        
+
         return (
           <div>
             <button data-testid="update-no-user-btn" onClick={handleUpdate}>
@@ -406,12 +439,11 @@ describe('AuthContext', () => {
           <TestComponent />
         </AuthProvider>
       );
-      
-            
+
       await act(async () => {
         await userEvent.click(screen.getByTestId('update-no-user-btn'));
       });
-      
+
       // This should handle the case where user is null
       // The actual behavior depends on implementation
     });
@@ -419,44 +451,52 @@ describe('AuthContext', () => {
 
   describe('Integration Tests', () => {
     test('complete authentication flow', async () => {
-            renderWithAuthProvider();
-      
+      renderWithAuthProvider();
+
       // Start unauthenticated
-      expect(screen.getByTestId('authenticated')).toHaveTextContent('Not Authenticated');
-      
+      expect(screen.getByTestId('authenticated')).toHaveTextContent(
+        'Not Authenticated'
+      );
+
       // Register new user
       await act(async () => {
         await userEvent.click(screen.getByTestId('register-btn'));
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('authenticated')).toHaveTextContent('Authenticated');
+        expect(screen.getByTestId('authenticated')).toHaveTextContent(
+          'Authenticated'
+        );
       });
-      
+
       // Update profile
       await act(async () => {
         await userEvent.click(screen.getByTestId('update-profile-btn'));
       });
-      
+
       await waitFor(() => {
         const userData = JSON.parse(screen.getByTestId('user').textContent!);
         expect(userData.username).toBe('updateduser');
       });
-      
+
       // Logout
       await act(async () => {
         await userEvent.click(screen.getByTestId('logout-btn'));
       });
-      
-      expect(screen.getByTestId('authenticated')).toHaveTextContent('Not Authenticated');
-      
+
+      expect(screen.getByTestId('authenticated')).toHaveTextContent(
+        'Not Authenticated'
+      );
+
       // Login again
       await act(async () => {
         await userEvent.click(screen.getByTestId('login-btn'));
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('authenticated')).toHaveTextContent('Authenticated');
+        expect(screen.getByTestId('authenticated')).toHaveTextContent(
+          'Authenticated'
+        );
       });
     });
 
@@ -465,15 +505,21 @@ describe('AuthContext', () => {
         id: 1,
         username: 'persisteduser',
         email: 'persisted@example.com',
-        role: 'user'
+        role: 'user',
       };
-      
-      (localStorageMock.getItem as jest.Mock).mockReturnValue(JSON.stringify(savedUser));
-      
+
+      (localStorageMock.getItem as jest.Mock).mockReturnValue(
+        JSON.stringify(savedUser)
+      );
+
       renderWithAuthProvider();
-      
-      expect(screen.getByTestId('authenticated')).toHaveTextContent('Authenticated');
-      expect(screen.getByTestId('user')).toHaveTextContent(JSON.stringify(savedUser));
+
+      expect(screen.getByTestId('authenticated')).toHaveTextContent(
+        'Authenticated'
+      );
+      expect(screen.getByTestId('user')).toHaveTextContent(
+        JSON.stringify(savedUser)
+      );
       expect(localStorageMock.getItem).toHaveBeenCalledWith('currentUser');
     });
   });
@@ -481,11 +527,13 @@ describe('AuthContext', () => {
   describe('Error Handling', () => {
     test('handles corrupted localStorage data', () => {
       (localStorageMock.getItem as jest.Mock).mockReturnValue('invalid json');
-      
+
       // Should not crash and should start with no user
       renderWithAuthProvider();
-      
-      expect(screen.getByTestId('authenticated')).toHaveTextContent('Not Authenticated');
+
+      expect(screen.getByTestId('authenticated')).toHaveTextContent(
+        'Not Authenticated'
+      );
       expect(screen.getByTestId('user')).toHaveTextContent('No User');
     });
 
@@ -494,7 +542,7 @@ describe('AuthContext', () => {
       const TestComponentWithNetworkError = () => {
         const { login } = useAuth();
         const [result, setResult] = React.useState<AuthResult | null>(null);
-        
+
         const handleLogin = async () => {
           // Simulate network error by rejecting the promise
           try {
@@ -504,7 +552,7 @@ describe('AuthContext', () => {
             setResult({ success: false, error: 'Network error' });
           }
         };
-        
+
         return (
           <div>
             <button data-testid="network-error-btn" onClick={handleLogin}>
@@ -523,12 +571,11 @@ describe('AuthContext', () => {
           <TestComponent />
         </AuthProvider>
       );
-      
-            
+
       await act(async () => {
         await userEvent.click(screen.getByTestId('network-error-btn'));
       });
-      
+
       // The login should complete successfully in this case since we're using mock data
       // In a real scenario with actual network calls, this would test error handling
     });
@@ -538,18 +585,24 @@ describe('AuthContext', () => {
     test('shows loading state during initialization', () => {
       const TestComponentWithLoadingCheck = () => {
         const { loading } = useAuth();
-        const [initialLoading, setInitialLoading] = React.useState<boolean | null>(null);
-        
+        const [initialLoading, setInitialLoading] = React.useState<
+          boolean | null
+        >(null);
+
         React.useEffect(() => {
           if (initialLoading === null) {
             setInitialLoading(loading);
           }
         }, [loading, initialLoading]);
-        
+
         return (
           <div>
             <div data-testid="initial-loading">
-              {initialLoading !== null ? (initialLoading ? 'Was Loading' : 'Was Not Loading') : 'Unknown'}
+              {initialLoading !== null
+                ? initialLoading
+                  ? 'Was Loading'
+                  : 'Was Not Loading'
+                : 'Unknown'}
             </div>
             <div data-testid="current-loading">
               {loading ? 'Currently Loading' : 'Not Currently Loading'}
@@ -563,9 +616,11 @@ describe('AuthContext', () => {
           <TestComponentWithLoadingCheck />
         </AuthProvider>
       );
-      
+
       // The component should eventually show not loading
-      expect(screen.getByTestId('current-loading')).toHaveTextContent('Not Currently Loading');
+      expect(screen.getByTestId('current-loading')).toHaveTextContent(
+        'Not Currently Loading'
+      );
     });
   });
-}); 
+});
